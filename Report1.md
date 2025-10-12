@@ -22,7 +22,8 @@ El esquema muestra cómo un productor puede consultar sus datos financieros en l
 - **Motor RAG:** que recupera y razona sobre la información relevante.  
 - **Salidas:** respuestas financieras claras y recomendaciones.  
 
-*(Aquí irá la figura con un diagrama explicativo)*
+<img width="2602" height="1544" alt="image" src="https://github.com/user-attachments/assets/bcdb2bbb-52b7-4a68-88f9-709abcd05252" />
+
 
 ---
 
