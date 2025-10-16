@@ -22,7 +22,7 @@ export function Message({ message, isLast }: MessageProps) {
   return (
     <div
       className={cn(
-        'flex gap-3 px-4 py-6 group',
+        'flex gap-3 p-2 group',
         isUser ? 'flex-row-reverse' : 'flex-row'
       )}
     >
@@ -50,7 +50,7 @@ export function Message({ message, isLast }: MessageProps) {
         {/* Message bubble */}
         <div
           className={cn(
-            'rounded-lg px-4 py-3 break-words',
+            'rounded-lg px-4 py-2 break-words',
             isUser
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted',
@@ -86,11 +86,7 @@ export function Message({ message, isLast }: MessageProps) {
             <AlertDescription>{message.error}</AlertDescription>
           </Alert>
         )}
-
-        {/* Timestamp */}
-        <span className="text-xs text-muted-foreground px-1">
-          {format(message.timestamp, 'HH:mm', { locale: es })}
-        </span>
+        
 
         {/* Document references */}
         {message.metadata?.sources && message.metadata.sources.length > 0 && (

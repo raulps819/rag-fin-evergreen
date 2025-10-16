@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@/components/ui/input-group';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +49,13 @@ export function ChatInput({
     }
   }, [value]);
 
+  // Keep focus on input after response is received
+  useEffect(() => {
+    if (!disabled && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [disabled]);
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
     if (newValue.length <= maxLength) {
@@ -58,7 +69,6 @@ export function ChatInput({
       onSend(trimmedValue);
       setValue('');
       setRows(minRows);
-      textareaRef.current?.focus();
     }
   };
 
@@ -76,10 +86,10 @@ export function ChatInput({
   return (
     <div className={cn('border-t bg-background p-4', className)}>
       <div className="max-w-4xl mx-auto">
-        <div className="relative flex items-end gap-2">
+        <InputGroup>
           {/* Textarea */}
           <div className="flex-1 relative">
-            <Textarea
+            <InputGroupTextarea
               ref={textareaRef}
               value={value}
               onChange={handleChange}
@@ -94,7 +104,7 @@ export function ChatInput({
             />
 
             {/* Character counter */}
-            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
+            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground pointer-events-none">
               <span className={cn(isOverLimit && 'text-yellow-600 font-medium')}>
                 {value.length}
               </span>
@@ -103,20 +113,22 @@ export function ChatInput({
           </div>
 
           {/* Send button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSend}
-            size="icon"
-            className="h-[44px] w-[44px] shrink-0"
-          >
-            {disabled ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-            <span className="sr-only">Enviar mensaje</span>
-          </Button>
-        </div>
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              onClick={handleSubmit}
+              disabled={!canSend}
+              size="icon-sm"
+              className="h-[44px] w-[44px] shrink-0"
+            >
+              {disabled ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Send className="h-5 w-5" />
+              )}
+              <span className="sr-only">Enviar mensaje</span>
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
 
         {/* Helper text */}
         <p className="text-xs text-muted-foreground mt-2 px-1">
