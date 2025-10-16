@@ -84,7 +84,7 @@ export function ChatInput({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('border-t bg-background p-4', className)}>
+    <div className={cn('border-t bg-background p-2 sm:p-4', className)}>
       <div className="max-w-4xl mx-auto">
         <InputGroup>
           {/* Textarea */}
@@ -118,12 +118,12 @@ export function ChatInput({
               onClick={handleSubmit}
               disabled={!canSend}
               size="icon-sm"
-              className="h-[44px] w-[44px] shrink-0"
+              className="h-[40px] w-[40px] sm:h-[44px] sm:w-[44px] shrink-0"
             >
               {disabled ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
               ) : (
-                <Send className="h-5 w-5" />
+                <Send className="h-4 w-4 sm:h-5 sm:w-5" />
               )}
               <span className="sr-only">Enviar mensaje</span>
             </InputGroupButton>
@@ -131,7 +131,7 @@ export function ChatInput({
         </InputGroup>
 
         {/* Helper text */}
-        <p className="text-xs text-muted-foreground mt-2 px-1">
+        <p className="text-xs text-muted-foreground mt-1 sm:mt-2 px-1 hidden sm:block">
           Presiona <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Enter</kbd> para enviar,{' '}
           <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Shift</kbd> +{' '}
           <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Enter</kbd> para nueva línea

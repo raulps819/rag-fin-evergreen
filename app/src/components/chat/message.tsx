@@ -22,35 +22,35 @@ export function Message({ message, isLast }: MessageProps) {
   return (
     <div
       className={cn(
-        'flex gap-3 p-4 group',
+        'flex gap-2 sm:gap-3 px-3 py-3 sm:px-4 sm:py-4 group',
         isUser ? 'flex-row-reverse' : 'flex-row'
       )}
     >
       {/* Avatar */}
-      <Avatar className="h-8 w-8 shrink-0">
+      <Avatar className="h-6 w-6 sm:h-8 sm:w-8 shrink-0">
         {isUser ? (
           <>
             <AvatarImage src="" alt="Usuario" />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              <User className="h-4 w-4" />
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </>
         ) : (
           <>
             <AvatarImage src="" alt="Asistente" />
             <AvatarFallback className="bg-muted">
-              <Bot className="h-4 w-4" />
+              <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </>
         )}
       </Avatar>
 
       {/* Message Content */}
-      <div className={cn('flex flex-col gap-2 max-w-[80%]', isUser && 'items-end')}>
+      <div className={cn('flex flex-col gap-1 sm:gap-2 max-w-[85%] sm:max-w-[80%] min-w-0', isUser && 'items-end')}>
         {/* Message bubble */}
         <div
           className={cn(
-            'rounded-lg px-4 py-2 break-words',
+            'rounded-lg px-3 py-2 sm:px-4 sm:py-2 break-words text-sm sm:text-base',
             isUser
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted',
