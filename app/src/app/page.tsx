@@ -73,7 +73,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex flex-col flex-1">
         {/* Header */}
-        <header className="border-b bg-background px-4 py-4">
+        <header className="border-b bg-background px-4 p-4">
           <div className="mx-auto">
             <h1 className="text-2xl font-bold">Evergreen FinIA</h1>
             <p className="text-sm text-muted-foreground">

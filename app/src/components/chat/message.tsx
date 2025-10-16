@@ -22,7 +22,7 @@ export function Message({ message, isLast }: MessageProps) {
   return (
     <div
       className={cn(
-        'flex gap-3 p-2 group',
+        'flex gap-3 p-4 group',
         isUser ? 'flex-row-reverse' : 'flex-row'
       )}
     >
