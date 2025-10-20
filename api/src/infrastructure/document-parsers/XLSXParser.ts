@@ -13,8 +13,10 @@ export class XLSXParser implements IDocumentParser {
 
       sheetNames.forEach((sheetName) => {
         const worksheet = workbook.Sheets[sheetName];
+        if (!worksheet) {
+          throw new Error(`Worksheet ${sheetName} not found`);
+        }
         const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
-
         sheets.push(`\n=== Sheet: ${sheetName} ===\n`);
         sheets.push(this.convertSheetToText(data));
       });

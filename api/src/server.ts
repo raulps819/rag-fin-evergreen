@@ -8,7 +8,7 @@ import { errorHandler } from '@presentation/middlewares/errorHandler.js';
 import { healthRoutes } from '@presentation/routes/health.routes.js';
 
 // Import DI container
-import '@di/container.js';
+
 
 const buildServer = () => {
   const app = Fastify(serverConfig);
