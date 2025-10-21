@@ -1,5 +1,7 @@
 import { inject, injectable } from 'tsyringe';
 import { IDocumentRepository } from '@application/ports/IDocumentRepository.js';
+import { IDocumentParserFactory } from '@application/ports/IDocumentParserFactory.js';
+import { IIndexingService } from '@application/ports/IIndexingService.js';
 import { Document } from '@domain/entities/Document.js';
 import { DocumentType } from '@domain/value-objects/DocumentType.js';
 
@@ -20,7 +22,8 @@ export interface UploadDocumentInput {
 export class UploadDocumentUseCase {
   constructor(
     @inject('IDocumentRepository') private documentRepository: IDocumentRepository,
-    @inject('IDocumentParserFactory') private parserFactory: any
+    @inject('IDocumentParserFactory') private parserFactory: IDocumentParserFactory,
+    @inject('IIndexingService') private indexingService: IIndexingService
   ) {}
 
   async execute(input: UploadDocumentInput): Promise<Document> {
@@ -64,15 +67,23 @@ export class UploadDocumentUseCase {
       // Extraer texto
       const parsed = await parser.parse(document.filepath);
 
-      // Marcar como COMPLETED con el contenido extraído
+      // Actualizar documento con contenido extraído
       document.markAsCompleted(parsed.text, parsed.pageCount);
-
-      // Agregar metadata del parser
       if (parsed.metadata) {
         document.setMetadata(parsed.metadata);
       }
-
       await this.documentRepository.update(document);
+
+      // Indexar documento en vector store (chunking + embeddings)
+      const indexingResult = await this.indexingService.indexDocument(document);
+
+      if (!indexingResult.success) {
+        console.error(`Failed to index document ${document.id}: ${indexingResult.error}`);
+        // Document parsing succeeded but indexing failed
+        // Keep document as COMPLETED but log the error
+      } else {
+        console.log(`Successfully indexed document ${document.id} with ${indexingResult.chunksIndexed} chunks`);
+      }
     } catch (error) {
       // Marcar como FAILED
       document.markAsFailed();

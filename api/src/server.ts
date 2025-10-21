@@ -8,6 +8,7 @@ import { registerSwagger } from '@presentation/plugins/swagger.plugin.js';
 import { errorHandler } from '@presentation/middlewares/errorHandler.js';
 import { healthRoutes } from '@presentation/routes/health.routes.js';
 import { documentsRoutes } from '@presentation/routes/documents.routes.js';
+import { chatRoutes } from '@presentation/routes/chat.routes.js';
 
 // Import DI container to initialize it
 import '@di/container.js';
@@ -32,8 +33,9 @@ const start = async () => {
     await registerSwagger(app);
 
     // Register routes
-    await app.register(healthRoutes, { prefix: '/api/v1' });
-    await app.register(documentsRoutes, { prefix: '/api/v1/documents' });
+    await app.register(healthRoutes, { prefix: '/api' });
+    await app.register(documentsRoutes, { prefix: '/api/documents' });
+    await app.register(chatRoutes, { prefix: '/api/chat' });
 
     // Start server
     await app.listen({ port: env.PORT, host: env.HOST });
