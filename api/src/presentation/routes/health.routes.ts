@@ -27,7 +27,7 @@ export const healthRoutes = async (app: FastifyInstance) => {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       // TODO: Implementar checks reales de servicios
       const health = {
         status: 'healthy' as const,
@@ -67,7 +67,7 @@ export const healthRoutes = async (app: FastifyInstance) => {
         },
       },
     },
-    async (request, reply) => {
+    async (_request, reply) => {
       const memUsage = process.memoryUsage();
       const status = {
         uptime: process.uptime(),

@@ -1,5 +1,5 @@
 import { IDocumentParser, ParsedDocument } from '@application/ports/IDocumentParser.js';
-import pdf from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import fs from 'fs/promises';
 import { injectable } from 'tsyringe';
 
@@ -8,14 +8,19 @@ export class PDFParser implements IDocumentParser {
   async parse(filepath: string): Promise<ParsedDocument> {
     try {
       const dataBuffer = await fs.readFile(filepath);
-      const data = await pdf(dataBuffer);
+      const parser = new PDFParse({data: dataBuffer});
+      const [textResult, infoResult] = await Promise.all([
+        parser.getText(),
+        parser.getInfo()
+      ]);
 
       return {
-        text: data.text,
-        pageCount: data.numpages,
+        text: textResult.text,
+        pageCount: textResult.total,
         metadata: {
-          info: data.info,
-          version: data.version,
+          info: infoResult.info,
+          metadata: infoResult.metadata,
+          fingerprints: infoResult.fingerprints,
         },
       };
     } catch (error) {

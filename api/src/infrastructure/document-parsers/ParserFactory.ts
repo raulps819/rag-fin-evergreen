@@ -1,18 +1,20 @@
 import { IDocumentParser } from '@application/ports/IDocumentParser.js';
-import { PDFParser } from './PDFParser.js';
-import { CSVParser } from './CSVParser.js';
-import { XLSXParser } from './XLSXParser.js';
-import { injectable } from 'tsyringe';
+import { IDocumentParserFactory } from '@application/ports/IDocumentParserFactory.js';
+import { inject, injectable } from 'tsyringe';
 
 @injectable()
-export class ParserFactory {
-  private parsers: IDocumentParser[];
+export class ParserFactory implements IDocumentParserFactory {
+  constructor(
+    @inject('PDFParser') private readonly pdfParser: IDocumentParser,
+    @inject('CSVParser') private readonly csvParser: IDocumentParser,
+    @inject('XLSXParser') private readonly xlsxParser: IDocumentParser,
+  ) {}
 
-  constructor() {
-    this.parsers = [
-      new PDFParser(),
-      new CSVParser(),
-      new XLSXParser(),
+  private get parsers(): IDocumentParser[] {
+    return [
+      this.pdfParser,
+      this.csvParser,
+      this.xlsxParser,
     ];
   }
 
