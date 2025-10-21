@@ -17,8 +17,8 @@ export const listDocumentsQuerySchema = z.object({
   status: DocumentStatusEnum.optional(),
   isTemporary: z.string().transform(val => val === 'true').optional(),
   search: z.string().optional(),
-  limit: z.string().transform(val => parseInt(val, 10)).optional(),
-  offset: z.string().transform(val => parseInt(val, 10)).optional(),
+  limit: z.coerce.number().int().nonnegative().default(10).catch(10),
+  offset: z.coerce.number().int().nonnegative().default(0).catch(0),
 });
 
 export type ListDocumentsQuery = z.infer<typeof listDocumentsQuerySchema>;

@@ -38,11 +38,24 @@ export class DocumentsController {
     const isTemporaryValue = fields.isTemporary?.value === 'true';
     const metadataValue = fields.metadata?.value;
 
+    // Parse metadata con manejo de errores
+    let parsedMetadata: Record<string, unknown> | undefined;
+    if (metadataValue) {
+      try {
+        parsedMetadata = JSON.parse(metadataValue);
+      } catch (error) {
+        return reply.status(400).send({
+          error: 'Invalid metadata format',
+          details: 'Metadata must be valid JSON'
+        });
+      }
+    }
+
     // Validar datos
     const validatedData = uploadDocumentSchema.parse({
       documentType: documentTypeValue,
       isTemporary: isTemporaryValue,
-      metadata: metadataValue ? JSON.parse(metadataValue) : undefined,
+      metadata: parsedMetadata,
     });
 
     // Generar nombre de archivo único
