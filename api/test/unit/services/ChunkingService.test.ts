@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ChunkingService } from '../../../src/application/services/ChunkingService.js';
 
@@ -116,7 +117,7 @@ Paragraph 3 line 1.`;
         preserveParagraphs: false,
       });
 
-      result.forEach((chunk, index) => {
+      result.forEach((chunk) => {
         // Allow some flexibility due to sentence boundary breaking
         expect(chunk.content.length).toBeLessThanOrEqual(chunkSize * 1.5);
       });

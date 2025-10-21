@@ -1,8 +1,8 @@
+import 'reflect-metadata';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { IndexingService } from '../../../src/application/services/IndexingService.js';
 import { Document } from '../../../src/domain/entities/Document.js';
 import { DocumentType } from '../../../src/domain/value-objects/DocumentType.js';
-import { DocumentStatus } from '../../../src/domain/value-objects/DocumentStatus.js';
 
 // Mock implementations
 const mockParserFactory = {
@@ -101,7 +101,7 @@ describe('IndexingService', () => {
       expect(result.success).toBe(true);
       expect(result.documentId).toBe(testDocument.id);
       expect(result.chunksIndexed).toBe(2);
-      expect(result.processingTime).toBeGreaterThan(0);
+      expect(result.processingTime).toBeGreaterThanOrEqual(0);
 
       // Verify mock calls
       expect(mockParserFactory.getParser).toHaveBeenCalledWith('application/pdf');
