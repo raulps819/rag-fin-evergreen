@@ -11,6 +11,7 @@ from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.domain.entities.document import Document
 from app.infrastructure.db.sqlite_client import SQLiteClient
+from app.infrastructure.db.migrations import run_migrations
 
 
 @pytest.fixture
@@ -33,22 +34,25 @@ async def db_client(temp_db):
     client = SQLiteClient()
     await client.connect()
 
-    # Create schema
-    schema_sql = """
-    CREATE TABLE IF NOT EXISTS documents (
-        id TEXT PRIMARY KEY,
-        filename TEXT NOT NULL,
-        file_type TEXT NOT NULL,
-        chunk_count INTEGER NOT NULL DEFAULT 0,
-        upload_date TIMESTAMP NOT NULL,
-        is_temporary BOOLEAN NOT NULL DEFAULT 0
-    );
-    """
-    for statement in schema_sql.split(";"):
-        statement = statement.strip()
-        if statement:
-            await client.execute(statement)
-    await client.commit()
+    # Use the same migration logic as production
+    await run_migrations(client)
+
+    yield client
+
+    await client.disconnect()
+
+
+@pytest.fixture
+async def sqlite_client(temp_db):
+    """Alias for db_client - used by repository tests."""
+    # Override DATABASE_URL for testing
+    os.environ["DATABASE_URL"] = f"sqlite:///{temp_db}"
+
+    client = SQLiteClient()
+    await client.connect()
+
+    # Use the same migration logic as production
+    await run_migrations(client)
 
     yield client
 
@@ -92,6 +96,45 @@ def mock_vector_store():
     ]
     store.delete_document.return_value = None
     return store
+
+
+@pytest.fixture
+def mock_conversation_repository():
+    """Mock conversation repository."""
+    from app.domain.entities.conversation import Conversation
+
+    repo = AsyncMock()
+
+    # Mock save - returns a conversation ID
+    repo.save.return_value = "test-conversation-id"
+
+    # Mock get_by_id - returns a conversation
+    mock_conversation = Conversation(
+        id="test-conversation-id",
+        created_at=datetime(2024, 1, 15, 10, 30, 0),
+        updated_at=datetime(2024, 1, 15, 10, 30, 0),
+        messages=[]
+    )
+    repo.get_by_id.return_value = mock_conversation
+
+    # Mock update
+    repo.update.return_value = None
+
+    return repo
+
+
+@pytest.fixture
+def mock_message_repository():
+    """Mock message repository."""
+    repo = AsyncMock()
+
+    # Mock save - returns a message ID
+    repo.save.return_value = "test-message-id"
+
+    # Mock get_by_conversation_id - returns empty list
+    repo.get_by_conversation_id.return_value = []
+
+    return repo
 
 
 @pytest.fixture

@@ -18,9 +18,6 @@ class Settings:
     # Server
     PORT: int = int(os.getenv("PORT", "8000"))
 
-    # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
-
     # OpenAI
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
 
@@ -31,6 +28,14 @@ class Settings:
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "1000"))
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
     TOP_K: int = int(os.getenv("TOP_K", "5"))
+
+    @property
+    def DATABASE_URL(self) -> str:
+        """
+        Database URL - dynamically reads from environment.
+        This allows tests to override the value by setting os.environ["DATABASE_URL"].
+        """
+        return os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
 
     @property
     def is_development(self) -> bool:

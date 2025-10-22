@@ -3,6 +3,53 @@ Integration tests for chat API endpoints.
 """
 import pytest
 from unittest.mock import patch, AsyncMock
+from contextlib import contextmanager
+from datetime import datetime
+from app.domain.entities.conversation import Conversation
+
+
+@contextmanager
+def mock_chat_dependencies():
+    """Context manager to mock all chat dependencies including repositories."""
+    with patch("app.core.container.container.embedding_service") as mock_embed, \
+         patch("app.core.container.container.vector_store") as mock_store, \
+         patch("app.core.container.container.chat_service") as mock_chat, \
+         patch("app.core.container.container.conversation_repository") as mock_conv_repo, \
+         patch("app.core.container.container.message_repository") as mock_msg_repo, \
+         patch("app.core.container.container.get_chat_usecase") as mock_get_usecase:
+
+        # Setup repository mocks
+        mock_conv_repo.save = AsyncMock(return_value="test-conv-id")
+        mock_conv_repo.get_by_id = AsyncMock(return_value=Conversation(
+            id="test-conv-id",
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            messages=[]
+        ))
+        mock_conv_repo.update = AsyncMock()
+        mock_msg_repo.save = AsyncMock(return_value="test-msg-id")
+
+        # Create a real ChatUseCase with mocked dependencies
+        from app.application.usecases.chat import ChatUseCase
+        chat_usecase_instance = ChatUseCase(
+            vector_store=mock_store,
+            llm_service=mock_chat,
+            embedding_service=mock_embed,
+            conversation_repository=mock_conv_repo,
+            message_repository=mock_msg_repo
+        )
+
+        # Make get_chat_usecase return our instance
+        mock_get_usecase.return_value = chat_usecase_instance
+
+        yield {
+            "embedding": mock_embed,
+            "vector_store": mock_store,
+            "chat": mock_chat,
+            "conv_repo": mock_conv_repo,
+            "msg_repo": mock_msg_repo,
+            "usecase": chat_usecase_instance
+        }
 
 
 @pytest.mark.integration
@@ -12,13 +59,10 @@ class TestChatAPI:
     @pytest.mark.asyncio
     async def test_chat_message_success(self, test_client):
         """Test successful chat message."""
-        with patch("app.core.container.container.embedding_service") as mock_embed, \
-             patch("app.core.container.container.vector_store") as mock_store, \
-             patch("app.core.container.container.chat_service") as mock_chat:
-
+        with mock_chat_dependencies() as mocks:
             # Mock responses
-            mock_embed.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
-            mock_store.search = AsyncMock(return_value=[
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[
                 {
                     "id": "doc1_chunk_0",
                     "document": "Los gastos del Q4 fueron $150,000",
@@ -31,7 +75,7 @@ class TestChatAPI:
                     "distance": 0.1
                 }
             ])
-            mock_chat.generate_response = AsyncMock(
+            mocks["chat"].generate_response = AsyncMock(
                 return_value="Los gastos del último trimestre fueron $150,000 según el reporte."
             )
 
@@ -46,6 +90,7 @@ class TestChatAPI:
             result = response.json()
 
             assert "answer" in result
+            assert "conversation_id" in result
             assert "sources" in result
             assert "created_at" in result
             assert "150,000" in result["answer"]
@@ -74,11 +119,9 @@ class TestChatAPI:
     @pytest.mark.asyncio
     async def test_chat_no_results(self, test_client):
         """Test chat when no relevant documents are found."""
-        with patch("app.core.container.container.embedding_service") as mock_embed, \
-             patch("app.core.container.container.vector_store") as mock_store:
-
-            mock_embed.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
-            mock_store.search = AsyncMock(return_value=[])  # No results
+        with mock_chat_dependencies() as mocks:
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[])  # No results
 
             request_data = {"message": "Pregunta sin resultados"}
             response = await test_client.post("/chat/message", json=request_data)
@@ -87,17 +130,15 @@ class TestChatAPI:
             result = response.json()
 
             assert "No encontré información relevante" in result["answer"]
+            assert "conversation_id" in result
             assert result["sources"] is None or len(result["sources"]) == 0
 
     @pytest.mark.asyncio
     async def test_chat_multiple_sources(self, test_client):
         """Test chat with multiple source documents."""
-        with patch("app.core.container.container.embedding_service") as mock_embed, \
-             patch("app.core.container.container.vector_store") as mock_store, \
-             patch("app.core.container.container.chat_service") as mock_chat:
-
-            mock_embed.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
-            mock_store.search = AsyncMock(return_value=[
+        with mock_chat_dependencies() as mocks:
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[
                 {
                     "id": "doc1_chunk_0",
                     "document": "Información del primer documento",
@@ -121,7 +162,7 @@ class TestChatAPI:
                     "distance": 0.15
                 }
             ])
-            mock_chat.generate_response = AsyncMock(
+            mocks["chat"].generate_response = AsyncMock(
                 return_value="Respuesta basada en múltiples documentos"
             )
 
@@ -138,12 +179,9 @@ class TestChatAPI:
     @pytest.mark.asyncio
     async def test_chat_relevance_scores(self, test_client):
         """Test that relevance scores are included in response."""
-        with patch("app.core.container.container.embedding_service") as mock_embed, \
-             patch("app.core.container.container.vector_store") as mock_store, \
-             patch("app.core.container.container.chat_service") as mock_chat:
-
-            mock_embed.generate_embedding = AsyncMock(return_value=[0.1] * 1536)
-            mock_store.search = AsyncMock(return_value=[
+        with mock_chat_dependencies() as mocks:
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[
                 {
                     "id": "doc1_chunk_0",
                     "document": "Test content",
@@ -156,7 +194,7 @@ class TestChatAPI:
                     "distance": 0.2  # Should give relevance of 0.8
                 }
             ])
-            mock_chat.generate_response = AsyncMock(return_value="Test response")
+            mocks["chat"].generate_response = AsyncMock(return_value="Test response")
 
             request_data = {"message": "Test query"}
             response = await test_client.post("/chat/message", json=request_data)
@@ -176,3 +214,39 @@ class TestChatAPI:
         )
 
         assert response.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_chat_with_conversation_id(self, test_client):
+        """Test chat with existing conversation_id."""
+        with mock_chat_dependencies() as mocks:
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[])
+            mocks["chat"].generate_response = AsyncMock(return_value="Test response")
+
+            # First message creates conversation
+            request1 = {"message": "First message"}
+            response1 = await test_client.post("/chat/message", json=request1)
+            assert response1.status_code == 200
+            conversation_id = response1.json()["conversation_id"]
+            assert "conversation_id" in response1.json()
+
+            # Second message uses same conversation
+            request2 = {"message": "Second message", "conversation_id": conversation_id}
+            response2 = await test_client.post("/chat/message", json=request2)
+            assert response2.status_code == 200
+            assert response2.json()["conversation_id"] == conversation_id
+
+    @pytest.mark.asyncio
+    async def test_chat_creates_new_conversation_if_not_provided(self, test_client):
+        """Test that chat creates a new conversation if conversation_id is not provided."""
+        with mock_chat_dependencies() as mocks:
+            mocks["embedding"].generate_embedding = AsyncMock(return_value=[0.1] * 1536)
+            mocks["vector_store"].search = AsyncMock(return_value=[])
+            mocks["chat"].generate_response = AsyncMock(return_value="Test response")
+
+            request = {"message": "Test message"}
+            response = await test_client.post("/chat/message", json=request)
+
+            assert response.status_code == 200
+            assert "conversation_id" in response.json()
+            assert response.json()["conversation_id"] is not None

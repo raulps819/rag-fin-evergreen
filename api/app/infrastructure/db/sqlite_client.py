@@ -12,12 +12,13 @@ class SQLiteClient:
     """
 
     def __init__(self):
-        self.db_path = settings.DATABASE_URL.replace("sqlite:///", "")
         self._connection: Optional[aiosqlite.Connection] = None
 
     async def connect(self):
         """Establish database connection."""
-        self._connection = await aiosqlite.connect(self.db_path)
+        # Read DATABASE_URL dynamically to allow test overrides
+        db_path = settings.DATABASE_URL.replace("sqlite:///", "")
+        self._connection = await aiosqlite.connect(db_path)
         self._connection.row_factory = aiosqlite.Row
 
     async def disconnect(self):

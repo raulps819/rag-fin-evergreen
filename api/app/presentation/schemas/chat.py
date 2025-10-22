@@ -36,19 +36,41 @@ class ChatRequest(BaseModel):
         min_length=1,
         max_length=2000
     )
+    conversation_id: Optional[str] = Field(
+        None,
+        description="Optional conversation ID. If not provided, a new conversation will be created."
+    )
 
     class Config:
         json_schema_extra = {
             "example": {
-                "message": "¿Cuáles fueron los gastos totales del último trimestre?"
+                "message": "¿Cuáles fueron los gastos totales del último trimestre?",
+                "conversation_id": "123e4567-e89b-12d3-a456-426614174000"
             }
         }
+
+
+class MessageResponse(BaseModel):
+    """Response schema for a message (used in conversation history)."""
+
+    id: str = Field(..., description="Message ID")
+    role: str = Field(..., description="Message role (user or assistant)")
+    content: str = Field(..., description="Message content")
+    sources: Optional[List[SourceSchema]] = Field(
+        None,
+        description="Source documents (only for assistant messages)"
+    )
+    created_at: datetime = Field(..., description="Message timestamp")
+
+    class Config:
+        from_attributes = True
 
 
 class ChatResponse(BaseModel):
     """Response schema for chat message."""
 
     answer: str = Field(..., description="Assistant's response")
+    conversation_id: str = Field(..., description="Conversation ID")
     sources: Optional[List[SourceSchema]] = Field(
         None,
         description="Source documents used to generate the answer"
@@ -59,6 +81,7 @@ class ChatResponse(BaseModel):
         json_schema_extra = {
             "example": {
                 "answer": "Los gastos totales del último trimestre fueron $150,000 según el reporte financiero.",
+                "conversation_id": "123e4567-e89b-12d3-a456-426614174000",
                 "sources": [
                     {
                         "document_id": "123e4567-e89b-12d3-a456-426614174000",

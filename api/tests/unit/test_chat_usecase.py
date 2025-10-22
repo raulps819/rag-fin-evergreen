@@ -17,13 +17,17 @@ class TestChatUseCase:
         self,
         mock_vector_store,
         mock_chat_service,
-        mock_embedding_service
+        mock_embedding_service,
+        mock_conversation_repository,
+        mock_message_repository
     ):
         """Create ChatUseCase with mocked dependencies."""
         return ChatUseCase(
             vector_store=mock_vector_store,
             llm_service=mock_chat_service,
-            embedding_service=mock_embedding_service
+            embedding_service=mock_embedding_service,
+            conversation_repository=mock_conversation_repository,
+            message_repository=mock_message_repository
         )
 
     @pytest.mark.asyncio
@@ -32,27 +36,36 @@ class TestChatUseCase:
         usecase,
         mock_embedding_service,
         mock_vector_store,
-        mock_chat_service
+        mock_chat_service,
+        mock_conversation_repository,
+        mock_message_repository
     ):
         """Test successful chat execution."""
         query = "¿Cuáles son los gastos principales?"
 
-        # Execute use case
-        result = await usecase.execute(query)
+        # Execute use case (now returns tuple)
+        message, conversation_id = await usecase.execute(query)
 
         # Verify result
-        assert isinstance(result, Message)
-        assert result.role == "assistant"
-        assert result.content == "Esta es una respuesta de prueba basada en el contexto proporcionado."
-        assert result.sources is not None
-        assert len(result.sources) == 1
-        assert result.sources[0].document_id == "test-doc-id"
-        assert result.sources[0].filename == "test.pdf"
+        assert isinstance(message, Message)
+        assert message.role == "assistant"
+        assert message.content == "Esta es una respuesta de prueba basada en el contexto proporcionado."
+        assert message.sources is not None
+        assert len(message.sources) == 1
+        assert message.sources[0].document_id == "test-doc-id"
+        assert message.sources[0].filename == "test.pdf"
+
+        # Verify conversation_id is returned
+        assert conversation_id == "test-conversation-id"
 
         # Verify calls
         mock_embedding_service.generate_embedding.assert_called_once_with(query)
         mock_vector_store.search.assert_called_once()
         mock_chat_service.generate_response.assert_called_once()
+
+        # Verify persistence calls
+        assert mock_conversation_repository.save.called or mock_conversation_repository.get_by_id.called
+        assert mock_message_repository.save.call_count == 2  # user + assistant messages
 
     @pytest.mark.asyncio
     async def test_execute_no_results(
@@ -65,13 +78,14 @@ class TestChatUseCase:
         mock_vector_store.search.return_value = []
 
         query = "Pregunta sin resultados"
-        result = await usecase.execute(query)
+        message, conversation_id = await usecase.execute(query)
 
         # Should return a message saying no information was found
-        assert isinstance(result, Message)
-        assert result.role == "assistant"
-        assert "No encontré información relevante" in result.content
-        assert result.sources is None or len(result.sources) == 0
+        assert isinstance(message, Message)
+        assert message.role == "assistant"
+        assert "No encontré información relevante" in message.content
+        assert message.sources is None or len(message.sources) == 0
+        assert conversation_id == "test-conversation-id"
 
     @pytest.mark.asyncio
     async def test_execute_multiple_sources(
@@ -119,13 +133,13 @@ class TestChatUseCase:
         ]
 
         query = "Pregunta con múltiples fuentes"
-        result = await usecase.execute(query)
+        message, conversation_id = await usecase.execute(query)
 
         # Verify sources
-        assert len(result.sources) == 3
-        assert result.sources[0].document_id == "doc1"
-        assert result.sources[1].document_id == "doc1"
-        assert result.sources[2].document_id == "doc2"
+        assert len(message.sources) == 3
+        assert message.sources[0].document_id == "doc1"
+        assert message.sources[1].document_id == "doc1"
+        assert message.sources[2].document_id == "doc2"
 
         # Verify LLM was called with all context
         call_args = mock_chat_service.generate_response.call_args
@@ -154,10 +168,10 @@ class TestChatUseCase:
             }
         ]
 
-        result = await usecase.execute("test query")
+        message, conversation_id = await usecase.execute("test query")
 
         # Relevance score should be 1 - distance = 0.9
-        assert result.sources[0].relevance_score == pytest.approx(0.9)
+        assert message.sources[0].relevance_score == pytest.approx(0.9)
 
     @pytest.mark.asyncio
     async def test_execute_content_preview(
@@ -181,8 +195,8 @@ class TestChatUseCase:
             }
         ]
 
-        result = await usecase.execute("test query")
+        message, conversation_id = await usecase.execute("test query")
 
         # Content should be truncated to 200 chars + "..."
-        assert len(result.sources[0].content) <= 203
-        assert result.sources[0].content.endswith("...")
+        assert len(message.sources[0].content) <= 203
+        assert message.sources[0].content.endswith("...")

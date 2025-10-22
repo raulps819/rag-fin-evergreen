@@ -3,12 +3,17 @@ Dependency container for manual wiring.
 """
 from app.infrastructure.db.sqlite_client import SQLiteClient
 from app.infrastructure.repositories.document_repository import DocumentRepository
+from app.infrastructure.repositories.conversation_repository import ConversationRepository
+from app.infrastructure.repositories.message_repository import MessageRepository
 from app.infrastructure.vector.chroma_store import ChromaVectorStore
 from app.infrastructure.llm.openai_embedding import OpenAIEmbeddingService
 from app.infrastructure.llm.openai_chat import OpenAIChatService
 from app.infrastructure.document_processor import DocumentProcessor
 from app.application.usecases.upload_document import UploadDocumentUseCase
 from app.application.usecases.chat import ChatUseCase
+from app.application.usecases.create_conversation import CreateConversationUseCase
+from app.application.usecases.list_conversations import ListConversationsUseCase
+from app.application.usecases.get_conversation import GetConversationUseCase
 
 
 class Container:
@@ -33,6 +38,8 @@ class Container:
         # Infrastructure layer
         self.db_client = SQLiteClient()
         self.document_repository = DocumentRepository(self.db_client)
+        self.conversation_repository = ConversationRepository(self.db_client)
+        self.message_repository = MessageRepository(self.db_client)
         self.vector_store = ChromaVectorStore()
         self.embedding_service = OpenAIEmbeddingService()
         self.chat_service = OpenAIChatService()
@@ -46,13 +53,36 @@ class Container:
             document_processor=self.document_processor
         )
 
-        self.chat_usecase = ChatUseCase(
-            vector_store=self.vector_store,
-            llm_service=self.chat_service,
-            embedding_service=self.embedding_service
+        self.create_conversation_usecase = CreateConversationUseCase(
+            conversation_repository=self.conversation_repository
+        )
+
+        self.list_conversations_usecase = ListConversationsUseCase(
+            conversation_repository=self.conversation_repository
+        )
+
+        self.get_conversation_usecase = GetConversationUseCase(
+            conversation_repository=self.conversation_repository,
+            message_repository=self.message_repository
         )
 
         self._initialized = True
+
+    def get_chat_usecase(self) -> ChatUseCase:
+        """
+        Get ChatUseCase instance with dependencies.
+        Creates a new instance each time to allow proper dependency injection in tests.
+
+        Returns:
+            ChatUseCase instance
+        """
+        return ChatUseCase(
+            vector_store=self.vector_store,
+            llm_service=self.chat_service,
+            embedding_service=self.embedding_service,
+            conversation_repository=self.conversation_repository,
+            message_repository=self.message_repository
+        )
 
 
 # Global container instance
