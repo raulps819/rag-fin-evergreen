@@ -29,6 +29,8 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     print("👋 Shutting down application")
+
+    # Close database
     await container.db_client.disconnect()
 
 

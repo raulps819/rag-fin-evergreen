@@ -14,16 +14,13 @@ class OpenAIEmbeddingService:
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
         self.model = "text-embedding-3-small"
-        self._client = None
+        # Create client once at initialization to avoid httpx wrapper issues
+        self._client = AsyncOpenAI(api_key=self.api_key) if self.api_key else None
 
     def _get_client(self) -> AsyncOpenAI:
-        """Get or create OpenAI client."""
-        if not self.api_key:
-            raise ValueError("OPENAI_API_KEY not configured in environment variables")
-
+        """Get OpenAI client."""
         if not self._client:
-            self._client = AsyncOpenAI(api_key=self.api_key)
-
+            raise ValueError("OPENAI_API_KEY not configured in environment variables")
         return self._client
 
     async def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
@@ -59,3 +56,15 @@ class OpenAIEmbeddingService:
         """
         embeddings = await self.generate_embeddings([text])
         return embeddings[0] if embeddings else []
+
+    async def close(self):
+        """Close the OpenAI client and cleanup resources."""
+        if self._client:
+            try:
+                # OpenAI wraps httpx client, which can cause AttributeError on close
+                # We catch and ignore it as the client will be garbage collected
+                await self._client.close()
+            except AttributeError:
+                pass  # Ignore the _state error from AsyncHttpxClientWrapper
+            finally:
+                self._client = None

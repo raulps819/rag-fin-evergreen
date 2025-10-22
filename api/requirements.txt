@@ -13,7 +13,7 @@ aiosqlite==0.20.0
 python-dotenv==1.0.0
 
 # OpenAI
-openai==1.54.0
+openai==2.6.0
 
 # Vector Store
 chromadb==0.5.23

@@ -15,17 +15,14 @@ class OpenAIChatService(LLMServicePort):
 
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
-        self.model = "gpt-4o-mini"  # Fast and cost-effective
-        self._client = None
+        self.model = "gpt-5-nano"  # Fast and cost-effective
+        # Create client once at initialization to avoid httpx wrapper issues
+        self._client = AsyncOpenAI(api_key=self.api_key) if self.api_key else None
 
     def _get_client(self) -> AsyncOpenAI:
-        """Get or create OpenAI client."""
-        if not self.api_key:
-            raise ValueError("OPENAI_API_KEY not configured in environment variables")
-
+        """Get OpenAI client."""
         if not self._client:
-            self._client = AsyncOpenAI(api_key=self.api_key)
-
+            raise ValueError("OPENAI_API_KEY not configured in environment variables")
         return self._client
 
     async def generate_response(
@@ -84,8 +81,20 @@ Por favor, responde basándote únicamente en el contexto proporcionado."""
         response = await client.chat.completions.create(
             model=self.model,
             messages=messages,
-            temperature=0.3,  # Lower temperature for more consistent answers
-            max_tokens=1000
+            #temperature=0.3,  # Lower temperature for more consistent answers
+            max_completion_tokens=1000  # Updated parameter name for OpenAI 2.x
         )
 
         return response.choices[0].message.content.strip()
+
+    async def close(self):
+        """Close the OpenAI client and cleanup resources."""
+        if self._client:
+            try:
+                # OpenAI wraps httpx client, which can cause AttributeError on close
+                # We catch and ignore it as the client will be garbage collected
+                await self._client.close()
+            except AttributeError:
+                pass  # Ignore the _state error from AsyncHttpxClientWrapper
+            finally:
+                self._client = None
