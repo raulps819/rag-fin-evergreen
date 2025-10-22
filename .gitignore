@@ -138,11 +138,6 @@ next-env.d.ts
 **/*.onnx
 **/*.gguf
 
-# ==========================================
-# Claude Code
-# ==========================================
-CLAUDE.md
-.claude
 
 # Dependencies
 node_modules/
@@ -195,3 +190,55 @@ Thumbs.db
 .turbo
 .next/
 out/
+
+# Entorno virtual
+.venv/
+env/
+venv/
+ENV/
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos temporales y logs
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+
+# Configuración local
+.env
+*.env.local
+.env.*
+!env.example
+
+# Dependencias y builds
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.iml
+
+# Archivos de pruebas
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.mypy_cache/
+.cache/
+pytestdebug.log
+
+# Archivos de documentación generados
+docs/_build/
+
+# Archivos de Uvicorn / FastAPI temporales
+*.sqlite3
+*.db
