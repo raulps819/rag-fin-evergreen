@@ -4,12 +4,24 @@ uvicorn==0.38.0
 pydantic==2.12.3
 pydantic_core==2.41.4
 starlette==0.48.0
+python-multipart==0.0.9
 
 # Database
 aiosqlite==0.20.0
 
 # Configuration
 python-dotenv==1.0.0
+
+# OpenAI
+openai==1.54.0
+
+# Vector Store
+chromadb==0.5.23
+
+# Document Processing
+pdfminer.six==20231228
+pandas==2.2.3
+openpyxl==3.1.5
 
 # Dependencies
 annotated-types==0.7.0

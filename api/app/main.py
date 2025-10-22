@@ -7,7 +7,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.presentation.api import health
+from app.core.container import container
+from app.infrastructure.db.migrations import run_migrations
+from app.presentation.api import health, documents
 
 
 @asynccontextmanager
@@ -20,10 +22,14 @@ async def lifespan(app: FastAPI):
     print(f"🚀 Starting application in {settings.ENV} mode")
     print(f"📊 Database: {settings.DATABASE_URL}")
 
+    # Run database migrations
+    await run_migrations(container.db_client)
+
     yield
 
     # Shutdown
     print("👋 Shutting down application")
+    await container.db_client.disconnect()
 
 
 # Create FastAPI application
@@ -47,3 +53,4 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router)
+app.include_router(documents.router)
