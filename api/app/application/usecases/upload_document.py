@@ -55,7 +55,7 @@ class UploadDocumentUseCase:
             raise ValueError("No text could be extracted from the document")
 
         # Step 2: Split text into chunks
-        chunks = self.document_processor.chunk_text(
+        chunks = await self.document_processor.chunk_text(
             text,
             chunk_size=settings.CHUNK_SIZE,
             overlap=settings.CHUNK_OVERLAP

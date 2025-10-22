@@ -36,22 +36,24 @@ class TestDocumentProcessor:
         with pytest.raises(ValueError):
             await processor.extract_text_from_csv(b"")
 
-    def test_chunk_text_basic(self):
+    @pytest.mark.asyncio
+    async def test_chunk_text_basic(self):
         """Test basic text chunking."""
         processor = DocumentProcessor()
         text = "This is a test. " * 100  # Create a long text
 
-        chunks = processor.chunk_text(text, chunk_size=50, overlap=10)
+        chunks = await processor.chunk_text(text, chunk_size=50, overlap=10)
 
         assert len(chunks) > 0
         assert all(len(chunk) <= 60 for chunk in chunks)  # Allow some margin
 
-    def test_chunk_text_with_overlap(self):
+    @pytest.mark.asyncio
+    async def test_chunk_text_with_overlap(self):
         """Test chunking with overlap."""
         processor = DocumentProcessor()
         text = "First sentence. Second sentence. Third sentence. Fourth sentence."
 
-        chunks = processor.chunk_text(text, chunk_size=30, overlap=10)
+        chunks = await processor.chunk_text(text, chunk_size=30, overlap=10)
 
         assert len(chunks) >= 2
         # Check that there's some overlap
@@ -62,30 +64,33 @@ class TestDocumentProcessor:
                 for word in chunks[0].split()[-3:]
             )
 
-    def test_chunk_text_empty(self):
+    @pytest.mark.asyncio
+    async def test_chunk_text_empty(self):
         """Test chunking empty text."""
         processor = DocumentProcessor()
 
-        chunks = processor.chunk_text("", chunk_size=100, overlap=20)
+        chunks = await processor.chunk_text("", chunk_size=100, overlap=20)
 
         assert chunks == []
 
-    def test_chunk_text_short(self):
+    @pytest.mark.asyncio
+    async def test_chunk_text_short(self):
         """Test chunking text shorter than chunk size."""
         processor = DocumentProcessor()
         text = "Short text"
 
-        chunks = processor.chunk_text(text, chunk_size=100, overlap=20)
+        chunks = await processor.chunk_text(text, chunk_size=100, overlap=20)
 
         assert len(chunks) == 1
         assert chunks[0] == text
 
-    def test_chunk_text_sentence_boundary(self):
+    @pytest.mark.asyncio
+    async def test_chunk_text_sentence_boundary(self):
         """Test that chunking respects sentence boundaries."""
         processor = DocumentProcessor()
         text = "First sentence here. Second sentence here. Third sentence here."
 
-        chunks = processor.chunk_text(text, chunk_size=30, overlap=5)
+        chunks = await processor.chunk_text(text, chunk_size=30, overlap=5)
 
         # Chunks should end at sentence boundaries when possible
         for chunk in chunks:

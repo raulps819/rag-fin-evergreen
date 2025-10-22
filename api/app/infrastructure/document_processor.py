@@ -88,7 +88,7 @@ class DocumentProcessor:
             raise ValueError(f"Unsupported file type: {file_type}")
 
     @staticmethod
-    def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> List[str]:
+    async def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> List[str]:
         """
         Split text into chunks with overlap.
 
