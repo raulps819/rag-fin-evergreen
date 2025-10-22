@@ -5,8 +5,10 @@ from app.infrastructure.db.sqlite_client import SQLiteClient
 from app.infrastructure.repositories.document_repository import DocumentRepository
 from app.infrastructure.vector.chroma_store import ChromaVectorStore
 from app.infrastructure.llm.openai_embedding import OpenAIEmbeddingService
+from app.infrastructure.llm.openai_chat import OpenAIChatService
 from app.infrastructure.document_processor import DocumentProcessor
 from app.application.usecases.upload_document import UploadDocumentUseCase
+from app.application.usecases.chat import ChatUseCase
 
 
 class Container:
@@ -33,6 +35,7 @@ class Container:
         self.document_repository = DocumentRepository(self.db_client)
         self.vector_store = ChromaVectorStore()
         self.embedding_service = OpenAIEmbeddingService()
+        self.chat_service = OpenAIChatService()
         self.document_processor = DocumentProcessor()
 
         # Application layer - Use cases
@@ -41,6 +44,12 @@ class Container:
             vector_store=self.vector_store,
             embedding_service=self.embedding_service,
             document_processor=self.document_processor
+        )
+
+        self.chat_usecase = ChatUseCase(
+            vector_store=self.vector_store,
+            llm_service=self.chat_service,
+            embedding_service=self.embedding_service
         )
 
         self._initialized = True
