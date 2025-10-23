@@ -85,14 +85,28 @@ Por favor, responde de manera útil basándote en el contexto si está disponibl
             }
         ]
 
-        # Generate response
-        response = await client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            max_completion_tokens=1000
-        )
+        # Log LLM call
+        logger.info(f"🤖 Calling LLM - Model: {self.model} | Query: '{query[:50]}...' | Context chunks: {len(context)}")
 
-        return response.choices[0].message.content.strip() if response.choices[0].message.content else ""
+        # Generate response
+        try:
+            response = await client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                max_completion_tokens=1000
+            )
+
+            content = response.choices[0].message.content
+
+            if not content:
+                logger.warning(f"Empty response from LLM for query: '{query}'")
+                return "Lo siento, no pude generar una respuesta en este momento. Por favor, intenta reformular tu pregunta."
+
+            return content.strip()
+
+        except Exception as e:
+            logger.error(f"Error calling OpenAI API: {str(e)}", exc_info=True)
+            raise
 
     async def close(self):
         """Close the OpenAI client and cleanup resources."""
