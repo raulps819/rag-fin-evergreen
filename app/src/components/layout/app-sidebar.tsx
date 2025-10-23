@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Conversation } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -109,13 +110,15 @@ export function AppSidebar({
 
       {/* Footer */}
       <div className="p-3 space-y-1">
+        <Button variant="ghost" size="sm" className="w-full justify-start gap-2" asChild>
+          <Link href="/settings">
+            <Settings className="h-4 w-4" />
+            Configuración
+          </Link>
+        </Button>
         <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
           <User className="h-4 w-4" />
           Mi cuenta
-        </Button>
-        <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
-          <Settings className="h-4 w-4" />
-          Configuración
         </Button>
       </div>
     </div>
