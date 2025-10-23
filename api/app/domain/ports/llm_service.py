@@ -2,7 +2,7 @@
 LLM service port (interface).
 """
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List
 
 
 class LLMServicePort(ABC):
@@ -22,7 +22,7 @@ class LLMServicePort(ABC):
 
         Args:
             query: User question
-            context: List of relevant text chunks for context
+            context: List of relevant text chunks (from documents or conversation history)
             system_prompt: Optional system prompt to guide the model
 
         Returns:

@@ -4,6 +4,7 @@ Chat use case.
 from datetime import datetime
 from typing import List, Optional
 import uuid
+import logging
 
 from app.domain.entities.message import Message, Source
 from app.domain.entities.conversation import Conversation
@@ -13,6 +14,8 @@ from app.domain.ports.conversation_repository import ConversationRepositoryPort
 from app.domain.ports.message_repository import MessageRepositoryPort
 from app.infrastructure.llm.openai_embedding import OpenAIEmbeddingService
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class ChatUseCase:
@@ -72,16 +75,27 @@ class ChatUseCase:
         )
         await self.message_repository.save(user_message, conversation_id)
 
-        # Step 2: Generate embedding for the query
+        # Step 2: Retrieve conversation history
+        conversation_messages = await self.message_repository.get_by_conversation_id(conversation_id)
+
+        # Build conversation history (exclude the just-saved user message)
+        conversation_history = []
+        for msg in conversation_messages[:-1]:  # Exclude last message (current query)
+            conversation_history.append(f"{msg.role.upper()}: {msg.content}")
+
+        # Limit history to recent messages
+        conversation_history = conversation_history[-settings.CONVERSATION_HISTORY_LIMIT:]
+
+        # Step 3: Generate embedding and search for relevant chunks
         query_embedding = await self.embedding_service.generate_embedding(query)
 
-        # Step 3: Search for relevant chunks in vector store
+        # Search for relevant chunks in vector store
         search_results = await self.vector_store.search(
             query_embedding=query_embedding,
             top_k=settings.TOP_K
         )
 
-        # Step 4: Extract context and sources
+        # Step 4: Build context and sources
         context_chunks = []
         sources = []
 
@@ -98,16 +112,27 @@ class ChatUseCase:
             )
             sources.append(source)
 
-        # Step 5: Generate response using LLM
-        if not context_chunks:
-            answer = "No encontré información relevante en los documentos para responder tu pregunta. Por favor, asegúrate de haber subido documentos relacionados con tu consulta."
-        else:
-            answer = await self.llm_service.generate_response(
-                query=query,
-                context=context_chunks
-            )
+        # Step 5: Prepare context for LLM
+        # If no document chunks found, use conversation history as context
+        if not context_chunks and conversation_history:
+            logger.info(f"No document chunks found for query '{query}', using conversation history")
+            context_chunks = [
+                "Historial de la conversación:\n" + "\n".join(conversation_history)
+            ]
+            sources = None  # No document sources
+        elif not context_chunks:
+            # No chunks and no history - still provide empty context
+            logger.info(f"No context available for query '{query}'")
+            context_chunks = []
+            sources = None
 
-        # Step 6: Create and save assistant message
+        # Step 6: Generate response using LLM
+        answer = await self.llm_service.generate_response(
+            query=query,
+            context=context_chunks
+        )
+
+        # Step 5: Create and save assistant message
         assistant_message = Message(
             id=None,
             role="assistant",
@@ -117,7 +142,7 @@ class ChatUseCase:
         )
         await self.message_repository.save(assistant_message, conversation_id)
 
-        # Step 7: Update conversation timestamp
+        # Step 6: Update conversation timestamp
         conversation.updated_at = datetime.utcnow()
         await self.conversation_repository.update(conversation)
 

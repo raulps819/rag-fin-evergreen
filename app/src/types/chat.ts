@@ -2,6 +2,53 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 
 export type MessageStatus = 'sending' | 'sent' | 'error' | 'streaming';
 
+/**
+ * Backend source schema
+ * Matches: api/app/presentation/schemas/chat.py::SourceSchema
+ */
+export interface DocumentSource {
+  document_id: string;
+  filename: string;
+  chunk_index: number;
+  content: string;
+  relevance_score?: number;
+}
+
+/**
+ * Backend chat request
+ * Matches: api/app/presentation/schemas/chat.py::ChatRequest
+ */
+export interface ChatRequest {
+  message: string;
+  conversation_id?: string;
+}
+
+/**
+ * Backend chat response
+ * Matches: api/app/presentation/schemas/chat.py::ChatResponse
+ */
+export interface ChatResponse {
+  answer: string;
+  conversation_id: string;
+  sources?: DocumentSource[];
+  created_at: string; // ISO datetime
+}
+
+/**
+ * Backend message response (used in conversation history)
+ * Matches: api/app/presentation/schemas/chat.py::MessageResponse
+ */
+export interface MessageResponse {
+  id: string;
+  role: string;
+  content: string;
+  sources?: DocumentSource[];
+  created_at: string;
+}
+
+/**
+ * Frontend message type (camelCase, with extra UI state)
+ */
 export interface Message {
   id: string;
   role: MessageRole;
@@ -9,13 +56,45 @@ export interface Message {
   timestamp: Date;
   status?: MessageStatus;
   error?: string;
+  sources?: DocumentSource[]; // Keep backend format for now
   metadata?: {
-    sources?: DocumentReference[];
     charts?: ChartData[];
     tables?: TableData[];
   };
 }
 
+/**
+ * Convert backend MessageResponse to frontend Message
+ */
+export function toMessage(response: MessageResponse): Message {
+  return {
+    id: response.id,
+    role: response.role as MessageRole,
+    content: response.content,
+    timestamp: new Date(response.created_at),
+    status: 'sent',
+    sources: response.sources,
+  };
+}
+
+/**
+ * Convert backend ChatResponse to frontend Message
+ */
+export function chatResponseToMessage(response: ChatResponse): Message {
+  return {
+    id: `assistant-${Date.now()}`,
+    role: 'assistant',
+    content: response.answer,
+    timestamp: new Date(response.created_at),
+    status: 'sent',
+    sources: response.sources,
+  };
+}
+
+/**
+ * Legacy DocumentReference (kept for backward compatibility)
+ * Will be replaced by DocumentSource
+ */
 export interface DocumentReference {
   id: string;
   type: 'contract' | 'invoice' | 'purchase_order' | 'other';

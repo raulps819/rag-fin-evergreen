@@ -200,3 +200,100 @@ class TestChatUseCase:
         # Content should be truncated to 200 chars + "..."
         assert len(message.sources[0].content) <= 203
         assert message.sources[0].content.endswith("...")
+
+    @pytest.mark.asyncio
+    async def test_execute_conversational_greeting(
+        self,
+        usecase,
+        mock_chat_service,
+        mock_embedding_service,
+        mock_vector_store
+    ):
+        """Test that conversational messages like 'hola' don't trigger RAG."""
+        # Mock classify_intent to return "conversational"
+        mock_chat_service.classify_intent.return_value = "conversational"
+        mock_chat_service.generate_conversational_response.return_value = "¡Hola! Soy tu asistente financiero. ¿En qué puedo ayudarte hoy?"
+
+        query = "hola"
+        message, conversation_id = await usecase.execute(query)
+
+        # Verify classification was called
+        mock_chat_service.classify_intent.assert_called_once()
+
+        # Verify conversational response was generated
+        mock_chat_service.generate_conversational_response.assert_called_once()
+
+        # Verify RAG was NOT executed
+        mock_embedding_service.generate_embedding.assert_not_called()
+        mock_vector_store.search.assert_not_called()
+        mock_chat_service.generate_response.assert_not_called()
+
+        # Verify response is conversational, not the "no documents found" message
+        assert isinstance(message, Message)
+        assert message.role == "assistant"
+        assert "No encontré información relevante en los documentos para responder tu pregunta. Por favor, asegúrate de haber subido documentos relacionados con tu consulta." not in message.content
+        assert "¡Hola!" in message.content or "asistente" in message.content.lower()
+        assert message.sources is None
+
+    @pytest.mark.asyncio
+    async def test_execute_conversational_followup(
+        self,
+        usecase,
+        mock_chat_service,
+        mock_message_repository,
+        mock_embedding_service,
+        mock_vector_store
+    ):
+        """Test that follow-up questions use conversational mode when appropriate."""
+        from app.domain.entities.message import Message
+        from datetime import datetime
+
+        # Mock conversation history with previous messages
+        mock_message_repository.get_by_conversation_id.return_value = [
+            Message(
+                id="msg-1",
+                role="user",
+                content="¿Cuánto gasté en enero?",
+                created_at=datetime(2024, 1, 15, 10, 30, 0),
+                sources=None
+            ),
+            Message(
+                id="msg-2",
+                role="assistant",
+                content="En enero gastaste $5,000 en total.",
+                created_at=datetime(2024, 1, 15, 10, 30, 5),
+                sources=[]
+            ),
+            Message(
+                id="msg-3",
+                role="user",
+                content="¿Puedes explicarme mejor?",
+                created_at=datetime(2024, 1, 15, 10, 31, 0),
+                sources=None
+            )
+        ]
+
+        # Mock classify_intent to return "conversational" for follow-up
+        mock_chat_service.classify_intent.return_value = "conversational"
+        mock_chat_service.generate_conversational_response.return_value = "Claro, los $5,000 se distribuyeron en..."
+
+        query = "¿Puedes explicarme mejor?"
+        message, conversation_id = await usecase.execute(query, conversation_id="existing-conv-id")
+
+        # Verify classification was called with history
+        mock_chat_service.classify_intent.assert_called_once()
+        call_args = mock_chat_service.classify_intent.call_args
+        history = call_args.kwargs["conversation_history"]
+
+        # History should include previous messages but not the current one
+        assert len(history) >= 2
+        assert history[0]["content"] == "¿Cuánto gasté en enero?"
+        assert history[1]["content"] == "En enero gastaste $5,000 en total."
+
+        # Verify RAG was NOT executed
+        mock_embedding_service.generate_embedding.assert_not_called()
+        mock_vector_store.search.assert_not_called()
+
+        # Verify response is conversational
+        assert "No encontré información relevante en los documentos para responder tu pregunta. Por favor, asegúrate de haber subido documentos relacionados con tu consulta." not in message.content
+        assert message.sources is None
