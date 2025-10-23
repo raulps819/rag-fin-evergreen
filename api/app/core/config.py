@@ -28,6 +28,7 @@ class Settings:
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "1000"))
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
     TOP_K: int = int(os.getenv("TOP_K", "5"))
+    CONVERSATION_HISTORY_LIMIT: int = int(os.getenv("CONVERSATION_HISTORY_LIMIT", "10"))
 
     @property
     def DATABASE_URL(self) -> str:

@@ -3,9 +3,12 @@ OpenAI chat service.
 """
 from typing import List, Optional
 from openai import AsyncOpenAI
+import logging
 
 from app.domain.ports.llm_service import LLMServicePort
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAIChatService(LLMServicePort):
@@ -36,7 +39,7 @@ class OpenAIChatService(LLMServicePort):
 
         Args:
             query: User question
-            context: List of relevant text chunks for context
+            context: List of relevant text chunks (documents or conversation history)
             system_prompt: Optional system prompt to guide the model
 
         Returns:
@@ -46,26 +49,31 @@ class OpenAIChatService(LLMServicePort):
 
         # Default system prompt for financial assistant
         if not system_prompt:
-            system_prompt = """Eres un asistente financiero inteligente especializado en análisis de documentos financieros.
-Tu tarea es responder preguntas basándote en el contexto proporcionado de documentos financieros.
+            system_prompt = """Eres un asistente financiero inteligente y amigable.
+
+Tu tarea es ayudar al usuario respondiendo sus preguntas de manera profesional y útil.
 
 Reglas importantes:
-- Responde SOLO basándote en la información del contexto proporcionado
-- Si la información no está en el contexto, indica claramente que no tienes esa información
-- Sé preciso y conciso en tus respuestas
-- Utiliza formato claro y profesional
-- Si hay números o datos específicos, cítalos exactamente como aparecen
-- Responde en español"""
+- Si el contexto incluye documentos financieros, úsalos para responder con datos precisos
+- Si el contexto incluye historial de conversación, úsalo para mantener coherencia
+- Si no hay suficiente información en el contexto para responder una pregunta específica sobre documentos, indica claramente que no tienes esa información
+- Puedes saludar cordialmente y mantener conversaciones casuales
+- Sé amable, preciso y conciso
+- Responde siempre en español"""
 
         # Build context text
-        context_text = "\n\n---\n\n".join(context) if context else "No hay contexto disponible."
+        if not context:
+            # No context available - conversational mode
+            context_text = "No hay documentos cargados aún. Puedes mantener una conversación general."
+        else:
+            context_text = "\n\n---\n\n".join(context)
 
         # Build messages
         messages = [
             {"role": "system", "content": system_prompt},
             {
                 "role": "user",
-                "content": f"""Contexto de documentos financieros:
+                "content": f"""Contexto disponible:
 
 {context_text}
 
@@ -73,7 +81,7 @@ Reglas importantes:
 
 Pregunta del usuario: {query}
 
-Por favor, responde basándote únicamente en el contexto proporcionado."""
+Por favor, responde de manera útil basándote en el contexto si está disponible."""
             }
         ]
 
@@ -81,11 +89,10 @@ Por favor, responde basándote únicamente en el contexto proporcionado."""
         response = await client.chat.completions.create(
             model=self.model,
             messages=messages,
-            #temperature=0.3,  # Lower temperature for more consistent answers
-            max_completion_tokens=1000  # Updated parameter name for OpenAI 2.x
+            max_completion_tokens=1000
         )
 
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip() if response.choices[0].message.content else ""
 
     async def close(self):
         """Close the OpenAI client and cleanup resources."""

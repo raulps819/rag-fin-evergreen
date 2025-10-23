@@ -5,7 +5,7 @@ import pytest
 import os
 import tempfile
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from httpx import AsyncClient, ASGITransport
 
 from app.main import app
@@ -73,6 +73,8 @@ def mock_chat_service():
     """Mock OpenAI chat service."""
     service = AsyncMock()
     service.generate_response.return_value = "Esta es una respuesta de prueba basada en el contexto proporcionado."
+    service.classify_intent.return_value = "rag"  # Default to RAG intent
+    service.generate_conversational_response.return_value = "¡Hola! Soy tu asistente financiero. ¿En qué puedo ayudarte hoy?"
     return service
 
 
@@ -126,13 +128,28 @@ def mock_conversation_repository():
 @pytest.fixture
 def mock_message_repository():
     """Mock message repository."""
+    from app.domain.entities.message import Message
+
     repo = AsyncMock()
 
     # Mock save - returns a message ID
     repo.save.return_value = "test-message-id"
 
-    # Mock get_by_conversation_id - returns empty list
-    repo.get_by_conversation_id.return_value = []
+    # Mock get_by_conversation_id - returns list with just the current user message
+    # This simulates the message being saved before classification
+    def get_messages_side_effect(_conversation_id):
+        # Return a list with the just-saved user message
+        return [
+            Message(
+                id="msg-1",
+                role="user",
+                content="hola",
+                created_at=datetime(2024, 1, 15, 10, 30, 0),
+                sources=None
+            )
+        ]
+
+    repo.get_by_conversation_id.side_effect = get_messages_side_effect
 
     return repo
 
