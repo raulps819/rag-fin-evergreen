@@ -41,6 +41,11 @@ export function ChatContainer({
   }, [initialConversationId]);
 
   const handleSendMessage = async (content: string) => {
+    console.log('[ChatContainer] Sending message:', {
+      content: content.substring(0, 50) + '...',
+      conversationId,
+    });
+
     // Create user message
     const userMessage: MessageType = {
       id: `user-${Date.now()}`,
@@ -56,13 +61,20 @@ export function ChatContainer({
     try {
       // Call backend API
       const result = await sendMessage(content, conversationId);
+      console.log('[ChatContainer] Received response:', {
+        conversationId: result.conversationId,
+        messageLength: result.message.content.length,
+      });
 
-      // Update conversation ID if this is a new conversation
-      if (!conversationId && result.conversationId) {
+      // Always update conversation ID (backend creates it on first message)
+      if (result.conversationId) {
+        // Only trigger callback if it's a new conversation
+        if (!conversationId) {
+          onConversationChange?.(result.conversationId);
+        }
+
+        // Always update state and localStorage
         setConversationId(result.conversationId);
-        onConversationChange?.(result.conversationId);
-
-        // Save to localStorage for persistence
         localStorage.setItem('currentConversationId', result.conversationId);
       }
 
