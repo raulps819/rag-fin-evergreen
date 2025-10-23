@@ -34,6 +34,9 @@ export type {
   DocumentUploadResponse,
   DocumentListResponse,
   DocumentUploadOptions,
+  DocumentUploadMultipleOptions,
+  UploadResult,
+  BatchUploadResults,
   SupportedDocumentType,
 } from './document';
 

@@ -61,12 +61,44 @@ export function toDocuments(response: DocumentListResponse): Document[] {
 }
 
 /**
- * File upload options
+ * File upload options (single file)
  */
 export interface DocumentUploadOptions {
   file: File;
   isTemporary?: boolean;
   onProgress?: (progress: number) => void;
+}
+
+/**
+ * Multiple files upload options
+ */
+export interface DocumentUploadMultipleOptions {
+  files: File[];
+  isTemporary?: boolean;
+  onProgress?: (fileId: string, progress: number) => void;
+  maxConcurrent?: number; // Max files to upload simultaneously (default: 3)
+}
+
+/**
+ * Upload result for a single file in batch upload
+ */
+export interface UploadResult {
+  file: File;
+  fileId: string; // Temporary ID for tracking (file.name + timestamp)
+  status: 'pending' | 'uploading' | 'success' | 'error';
+  progress: number;
+  document?: Document; // Set on success
+  error?: string; // Set on error
+}
+
+/**
+ * Batch upload results
+ */
+export interface BatchUploadResults {
+  results: UploadResult[];
+  successCount: number;
+  errorCount: number;
+  totalCount: number;
 }
 
 /**

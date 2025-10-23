@@ -11,6 +11,9 @@ import {
   DocumentUploadResponse,
   DocumentListResponse,
   DocumentUploadOptions,
+  DocumentUploadMultipleOptions,
+  UploadResult,
+  BatchUploadResults,
   toDocument,
   toDocuments,
   isSupportedDocumentType,
@@ -136,4 +139,115 @@ export async function getDocument(documentId: string): Promise<Document> {
     }
     throw error;
   }
+}
+
+/**
+ * Upload multiple documents to the backend
+ *
+ * Uploads files in parallel with a concurrency limit (default: 3).
+ * Uses the same /documents/upload endpoint for each file.
+ *
+ * @param options - Upload options including files array and settings
+ * @returns Batch upload results with individual file statuses
+ */
+export async function uploadDocuments(
+  options: DocumentUploadMultipleOptions
+): Promise<BatchUploadResults> {
+  const {
+    files,
+    isTemporary = false,
+    onProgress,
+    maxConcurrent = 3
+  } = options;
+
+  // Validate all files first
+  const maxSize = 50 * 1024 * 1024; // 50MB
+  const invalidFiles: string[] = [];
+  const oversizedFiles: string[] = [];
+
+  files.forEach(file => {
+    if (!isSupportedDocumentType(file.name)) {
+      invalidFiles.push(file.name);
+    }
+    if (file.size > maxSize) {
+      oversizedFiles.push(file.name);
+    }
+  });
+
+  if (invalidFiles.length > 0) {
+    throw new Error(
+      `Archivos con tipo no soportado: ${invalidFiles.join(', ')}. Tipos permitidos: PDF, CSV, XLSX, XLS`
+    );
+  }
+
+  if (oversizedFiles.length > 0) {
+    throw new Error(
+      `Archivos demasiado grandes (máx. 50MB): ${oversizedFiles.join(', ')}`
+    );
+  }
+
+  // Create initial results array
+  const results: UploadResult[] = files.map((file, index) => ({
+    file,
+    fileId: `${file.name}-${Date.now()}-${index}`,
+    status: 'pending' as const,
+    progress: 0,
+  }));
+
+  // Helper function to upload a single file
+  const uploadSingleFile = async (result: UploadResult): Promise<UploadResult> => {
+    try {
+      // Update status to uploading
+      result.status = 'uploading';
+      result.progress = 0;
+      onProgress?.(result.fileId, 0);
+
+      // Upload the file
+      const document = await uploadDocument({
+        file: result.file,
+        isTemporary,
+        onProgress: (progress) => {
+          result.progress = progress;
+          onProgress?.(result.fileId, progress);
+        },
+      });
+
+      // Success
+      result.status = 'success';
+      result.progress = 100;
+      result.document = document;
+      onProgress?.(result.fileId, 100);
+
+      return result;
+    } catch (error) {
+      // Error
+      result.status = 'error';
+      result.error = error instanceof Error ? error.message : 'Error desconocido';
+      onProgress?.(result.fileId, 0);
+
+      return result;
+    }
+  };
+
+  // Upload files with concurrency limit using Promise.all with batching
+  const completed: UploadResult[] = [];
+
+  for (let i = 0; i < results.length; i += maxConcurrent) {
+    const batch = results.slice(i, i + maxConcurrent);
+    const batchResults = await Promise.all(
+      batch.map(result => uploadSingleFile(result))
+    );
+    completed.push(...batchResults);
+  }
+
+  // Calculate summary
+  const successCount = completed.filter(r => r.status === 'success').length;
+  const errorCount = completed.filter(r => r.status === 'error').length;
+
+  return {
+    results: completed,
+    successCount,
+    errorCount,
+    totalCount: files.length,
+  };
 }

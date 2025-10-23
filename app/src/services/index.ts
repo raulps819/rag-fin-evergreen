@@ -10,6 +10,7 @@ export { checkHealth, isBackendAvailable } from './health';
 // Documents service
 export {
   uploadDocument,
+  uploadDocuments,
   listDocuments,
   deleteDocument,
   getDocument,
