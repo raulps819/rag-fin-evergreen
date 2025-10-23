@@ -78,13 +78,13 @@ export async function sendMessage(
 /**
  * Stream a message response (for future HU5 implementation)
  *
- * @param content - User message content
- * @param conversationId - Optional conversation ID
+ * @param _content - User message content
+ * @param _conversationId - Optional conversation ID
  * @returns AsyncGenerator yielding response chunks
  */
 export async function* streamMessage(
-  content: string,
-  conversationId?: string
+  _content: string,
+  _conversationId?: string
 ): AsyncGenerator<string, void, unknown> {
   // Placeholder for HU5 (Streaming SSE)
   // Will use EventSource or fetch with ReadableStream
@@ -93,7 +93,7 @@ export async function* streamMessage(
   throw new Error('Streaming not yet implemented (HU5)');
 
   // Future implementation:
-  // const eventSource = new EventSource(`/chat/stream?message=${encodeURIComponent(content)}`);
+  // const eventSource = new EventSource(`/chat/stream?message=${encodeURIComponent(_content)}`);
   // ...yield chunks...
 }
 

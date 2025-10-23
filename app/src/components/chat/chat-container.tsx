@@ -1,23 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Message as MessageType, SuggestedQuestion } from '@/types';
 import { MessageList } from './message-list';
 import { ChatInput } from './chat-input';
 import { SuggestedQuestions, defaultSuggestedQuestions } from './suggested-questions';
 import { toast } from 'sonner';
+import { sendMessage } from '@/services/chat';
+import { getErrorMessage } from '@/lib/api-client';
 
 interface ChatContainerProps {
   initialMessages?: MessageType[];
   suggestedQuestions?: SuggestedQuestion[];
+  conversationId?: string;
+  onConversationChange?: (conversationId: string) => void;
 }
 
 export function ChatContainer({
   initialMessages = [],
   suggestedQuestions = defaultSuggestedQuestions,
+  conversationId: initialConversationId,
+  onConversationChange,
 }: ChatContainerProps) {
   const [messages, setMessages] = useState<MessageType[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>(
+    initialConversationId
+  );
+
+  // Update messages when initialMessages change (e.g., when loading a conversation)
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
+
+  // Update conversationId when prop changes
+  useEffect(() => {
+    setConversationId(initialConversationId);
+  }, [initialConversationId]);
 
   const handleSendMessage = async (content: string) => {
     // Create user message
@@ -33,26 +54,20 @@ export function ChatContainer({
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/chat', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ message: content, conversationId: 'current' }),
-      // });
-      // const data = await response.json();
+      // Call backend API
+      const result = await sendMessage(content, conversationId);
 
-      // Mock response
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Update conversation ID if this is a new conversation
+      if (!conversationId && result.conversationId) {
+        setConversationId(result.conversationId);
+        onConversationChange?.(result.conversationId);
 
-      const assistantMessage: MessageType = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: `Respuesta simulada para: "${content}"\n\nEsta es una respuesta de ejemplo. Cuando conectes con el backend, aquí aparecerá la respuesta real del sistema RAG.`,
-        timestamp: new Date(),
-        status: 'sent',
-      };
+        // Save to localStorage for persistence
+        localStorage.setItem('currentConversationId', result.conversationId);
+      }
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Add assistant message with sources
+      setMessages((prev) => [...prev, result.message]);
     } catch (error) {
       console.error('Error sending message:', error);
 
@@ -62,12 +77,12 @@ export function ChatContainer({
         content: 'Lo siento, ocurrió un error al procesar tu mensaje.',
         timestamp: new Date(),
         status: 'error',
-        error: 'Error de conexión. Por favor, intenta nuevamente.',
+        error: getErrorMessage(error),
       };
 
       setMessages((prev) => [...prev, errorMessage]);
 
-      toast.error('No se pudo enviar el mensaje. Intenta nuevamente.');
+      toast.error(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

@@ -6,8 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Bot, User, AlertCircle } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { MessageSources } from './message-sources';
 
 interface MessageProps {
   message: MessageType;
@@ -86,19 +85,11 @@ export function Message({ message, isLast }: MessageProps) {
             <AlertDescription>{message.error}</AlertDescription>
           </Alert>
         )}
-        
 
-        {/* Document references */}
-        {message.metadata?.sources && message.metadata.sources.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {message.metadata.sources.map((source) => (
-              <button
-                key={source.id}
-                className="text-xs px-2 py-1 rounded-md bg-muted hover:bg-muted/80 transition-colors"
-              >
-                {source.title}
-              </button>
-            ))}
+        {/* Document sources (new from backend) */}
+        {!isUser && message.sources && message.sources.length > 0 && (
+          <div className="w-full">
+            <MessageSources sources={message.sources} />
           </div>
         )}
       </div>
