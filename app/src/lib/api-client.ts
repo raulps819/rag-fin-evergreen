@@ -76,11 +76,11 @@ async function apiClient<T = any>(
 
   const url = buildUrl(endpoint, params);
 
-  // Default headers
-  const defaultHeaders: HeadersInit = {
-    'Content-Type': 'application/json',
-    ...headers,
-  };
+  // Don't add Content-Type header for FormData (browser will set it with boundary)
+  const isFormData = fetchConfig.body instanceof FormData;
+  const defaultHeaders: HeadersInit = isFormData
+    ? headers
+    : { 'Content-Type': 'application/json', ...headers };
 
   // Create fetch promise
   const fetchPromise = fetch(url, {
