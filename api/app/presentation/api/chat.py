@@ -1,6 +1,7 @@
 """
 Chat API endpoints.
 """
+import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from app.core.container import container
@@ -8,6 +9,7 @@ from app.application.usecases.chat import ChatUseCase
 from app.presentation.schemas.chat import ChatRequest, ChatResponse, SourceSchema
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/message", response_model=ChatResponse)
@@ -31,6 +33,9 @@ async def send_message(
     The response is based only on the uploaded documents.
     """
     try:
+        # Log incoming request
+        logger.info(f"📨 Incoming chat request - Message: '{request.message}' | Conversation ID: {request.conversation_id or 'NEW'}")
+
         # Execute chat use case (returns message and conversation_id)
         message, conversation_id = await chat_usecase.execute(
             query=request.message,
@@ -39,7 +44,9 @@ async def send_message(
 
         # Convert sources to schema
         sources_schema = None
+        source_count = 0
         if message.sources:
+            source_count = len(message.sources)
             sources_schema = [
                 SourceSchema(
                     document_id=source.document_id,
@@ -51,6 +58,10 @@ async def send_message(
                 for source in message.sources
             ]
 
+        # Log response
+        answer_preview = message.content[:100] + "..." if len(message.content) > 100 else message.content
+        logger.info(f"📤 Sending response - Answer: '{answer_preview}' | Sources: {source_count} | Conversation: {conversation_id}")
+
         # Return response
         return ChatResponse(
             answer=message.content,
@@ -60,6 +71,8 @@ async def send_message(
         )
 
     except ValueError as e:
+        logger.error(f"❌ Validation error in chat endpoint: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"❌ Error processing chat message: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error processing chat message: {str(e)}")

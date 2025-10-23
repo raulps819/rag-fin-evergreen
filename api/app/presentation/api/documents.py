@@ -1,6 +1,7 @@
 """
 Documents API endpoints.
 """
+import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from typing import Optional
 
@@ -8,6 +9,7 @@ from app.core.container import container
 from app.presentation.schemas.document import DocumentUploadResponse, DocumentListResponse
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/upload", response_model=DocumentUploadResponse, status_code=201)
@@ -42,11 +44,18 @@ async def upload_document(
         )
 
     try:
+        # Log incoming upload
+        file_size_mb = 0
+        logger.info(f"📄 Incoming document upload - Filename: '{file.filename}' | Type: {file_extension} | Temporary: {is_temporary}")
+
         # Read file content
         file_content = await file.read()
+        file_size_mb = len(file_content) / (1024 * 1024)  # Convert to MB
 
         if not file_content:
             raise HTTPException(status_code=400, detail="File is empty")
+
+        logger.info(f"📦 Processing document - Size: {file_size_mb:.2f}MB")
 
         # Execute use case
         document = await container.upload_document_usecase.execute(
@@ -55,6 +64,9 @@ async def upload_document(
             file_type=file_extension,
             is_temporary=is_temporary or False
         )
+
+        # Log success
+        logger.info(f"✅ Document uploaded successfully - ID: {document.id} | Chunks: {document.chunk_count}")
 
         # Return response
         return DocumentUploadResponse(
@@ -67,8 +79,10 @@ async def upload_document(
         )
 
     except ValueError as e:
+        logger.error(f"❌ Validation error uploading document '{file.filename}': {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"❌ Error processing document '{file.filename}': {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error processing document: {str(e)}")
 
 
@@ -86,7 +100,11 @@ async def list_documents():
     - Temporary flag
     """
     try:
+        logger.info("📋 Listing all documents")
+
         documents = await container.document_repository.list_all()
+
+        logger.info(f"✅ Retrieved {len(documents)} document(s)")
 
         return DocumentListResponse(
             documents=[
@@ -104,4 +122,5 @@ async def list_documents():
         )
 
     except Exception as e:
+        logger.error(f"❌ Error listing documents: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Error listing documents: {str(e)}")
