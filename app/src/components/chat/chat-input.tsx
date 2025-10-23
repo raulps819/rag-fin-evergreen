@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useRef, KeyboardEvent, ChangeEvent, useEffect } from 'react';
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from '@/components/ui/input-group';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ModelSelector, AIModel } from './model-selector';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,27 +24,28 @@ export function ChatInput({
   className,
 }: ChatInputProps) {
   const [value, setValue] = useState('');
-  const [rows, setRows] = useState(1);
+  const [selectedModel, setSelectedModel] = useState<AIModel>('gpt-oss-120b');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const minRows = 1;
   const maxRows = 8;
 
   // Auto-resize textarea
-  useEffect(() => {
+  const updateTextareaHeight = () => {
     if (textareaRef.current) {
-      // Reset height to calculate new height
       textareaRef.current.style.height = 'auto';
-
-      const lineHeight = 24; // Approximate line height in pixels
       const scrollHeight = textareaRef.current.scrollHeight;
-      const newRows = Math.min(
-        Math.max(Math.floor(scrollHeight / lineHeight), minRows),
-        maxRows
+      const lineHeight = 24;
+      const newHeight = Math.min(
+        Math.max(scrollHeight, lineHeight * minRows),
+        lineHeight * maxRows
       );
-
-      setRows(newRows);
+      textareaRef.current.style.height = `${newHeight}px`;
     }
+  };
+
+  useEffect(() => {
+    updateTextareaHeight();
   }, [value]);
 
   // Keep focus on input after response is received
@@ -68,7 +67,12 @@ export function ChatInput({
     if (trimmedValue && !disabled) {
       onSend(trimmedValue);
       setValue('');
-      setRows(minRows);
+      // Reset textarea height after submit
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+        }
+      }, 0);
     }
   };
 
@@ -84,58 +88,104 @@ export function ChatInput({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('border-t bg-background p-2 sm:p-4', className)}>
-      <div className="max-w-4xl mx-auto">
-        <InputGroup>
-          {/* Textarea */}
-          <div className="flex-1 relative">
-            <InputGroupTextarea
-              ref={textareaRef}
-              value={value}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              disabled={disabled}
-              rows={rows}
-              className={cn(
-                'min-h-[44px] max-h-[200px] resize-none pr-12',
-                isOverLimit && 'border-yellow-500 focus-visible:ring-yellow-500'
-              )}
-            />
+    <div className={cn('border-t bg-gradient-to-b from-background to-muted/20 p-2 sm:p-2', className)}>
+      <div className="max-w-4xl mx-auto space-y-2">
+        {/* Main input card */}
+        <Card className="shadow-lg border-muted-foreground/10 transition-shadow hover:shadow-xl p-2">
+          <div className="flex items-center gap-2">
+            {/* Model selector */}
+            <div className="shrink-0">
+              <ModelSelector
+                value={selectedModel}
+                onChange={setSelectedModel}
+                disabled={disabled}
+              />
+            </div>
 
-            {/* Character counter */}
-            <div className="absolute bottom-2 right-2 text-xs text-muted-foreground pointer-events-none">
-              <span className={cn(isOverLimit && 'text-yellow-600 font-medium')}>
-                {value.length}
-              </span>
-              <span className="text-muted-foreground/50">/{maxLength}</span>
+            {/* Textarea container */}
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                disabled={disabled}
+                rows={1}
+                className={cn(
+                  'resize-none bg-transparent',
+                  'border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
+                  'text-sm sm:text-base',
+                  'placeholder:text-muted-foreground/60',
+                  'min-h-[24px] max-h-[192px]',
+                  'py-2 px-0',
+                  'overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20'
+                )}
+                style={{ lineHeight: '24px' }}
+              />
+
+              {/* Character counter */}
+              <div
+                className={cn(
+                  'absolute bottom-1 right-1 text-xs pointer-events-none',
+                  'px-1.5 py-0.5 rounded-md backdrop-blur-sm',
+                  'bg-background/80 border border-muted-foreground/10',
+                  'transition-colors duration-200',
+                  isOverLimit ? 'text-yellow-600 border-yellow-500/30' : 'text-muted-foreground'
+                )}
+              >
+                <span className={cn('font-medium', isOverLimit && 'text-yellow-600')}>
+                  {value.length}
+                </span>
+                <span className="text-muted-foreground/60">/{maxLength}</span>
+              </div>
+            </div>
+
+            {/* Send button */}
+            <div className="shrink-0">
+              <Button
+                onClick={handleSubmit}
+                disabled={!canSend}
+                size="icon"
+                className={cn(
+                  'h-10 w-10 rounded-xl transition-all duration-200',
+                  canSend
+                    ? 'bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg hover:scale-105'
+                    : 'bg-muted text-muted-foreground'
+                )}
+              >
+                {disabled ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
+                <span className="sr-only">Enviar mensaje</span>
+              </Button>
             </div>
           </div>
-
-          {/* Send button */}
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              onClick={handleSubmit}
-              disabled={!canSend}
-              size="icon-sm"
-              className="h-[40px] w-[40px] sm:h-[44px] sm:w-[44px] shrink-0"
-            >
-              {disabled ? (
-                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
-              <span className="sr-only">Enviar mensaje</span>
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        </Card>
 
         {/* Helper text */}
-        <p className="text-xs text-muted-foreground mt-1 sm:mt-2 px-1 hidden sm:block">
-          Presiona <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Enter</kbd> para enviar,{' '}
-          <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Shift</kbd> +{' '}
-          <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">Enter</kbd> para nueva línea
-        </p>
+        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground px-2">
+          <div className="hidden sm:flex items-center gap-1.5">
+            <kbd className="px-2 py-1 text-xs font-mono border rounded-md bg-muted/50 shadow-sm">
+              Enter
+            </kbd>
+            <span>para enviar</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5">
+            <div className="flex items-center gap-0.5">
+              <kbd className="px-2 py-1 text-xs font-mono border rounded-md bg-muted/50 shadow-sm">
+                Shift
+              </kbd>
+              <span>+</span>
+              <kbd className="px-2 py-1 text-xs font-mono border rounded-md bg-muted/50 shadow-sm">
+                Enter
+              </kbd>
+            </div>
+            <span>para nueva línea</span>
+          </div>
+        </div>
       </div>
     </div>
   );

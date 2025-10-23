@@ -4,3 +4,5 @@ export { MessageList } from './message-list';
 export { ChatInput } from './chat-input';
 export { SuggestedQuestions, defaultSuggestedQuestions } from './suggested-questions';
 export { MessageSources } from './message-sources';
+export { ModelSelector } from './model-selector';
+export type { AIModel } from './model-selector';
