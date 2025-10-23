@@ -1,6 +1,7 @@
 """
 FastAPI application entry point.
 """
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,6 +11,24 @@ from app.core.config import settings
 from app.core.container import container
 from app.infrastructure.db.migrations import run_migrations
 from app.presentation.api import health, documents, chat, conversations
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+# Set specific loggers to appropriate levels
+logging.getLogger("app.presentation.api").setLevel(logging.INFO)
+logging.getLogger("app.application.usecases").setLevel(logging.INFO)
+logging.getLogger("app.infrastructure.llm").setLevel(logging.INFO)
+
+# Reduce noise from libraries
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 
 @asynccontextmanager
