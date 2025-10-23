@@ -18,18 +18,8 @@ from generators.sales import generate_sales
 
 
 def create_output_directories(base_path):
-    """Crea la estructura de directorios de salida."""
-    directories = [
-        "contracts",
-        "purchase-orders",
-        "invoices",
-        "sales-history"
-    ]
-
-    for directory in directories:
-        dir_path = base_path / directory
-        dir_path.mkdir(parents=True, exist_ok=True)
-
+    """Crea el directorio de salida."""
+    base_path.mkdir(parents=True, exist_ok=True)
     return True
 
 
@@ -103,7 +93,7 @@ def generate_all_data(args):
         contracts = generate_contracts(args.contracts)
 
         # Guardar en CSV
-        filename = output_path / "contracts" / "contracts.csv"
+        filename = output_path / "contracts.csv"
         save_csv_file(contracts, filename)
 
         metadata["documents_by_type"]["contracts"] = args.contracts
@@ -116,7 +106,7 @@ def generate_all_data(args):
         orders = generate_orders(args.orders)
 
         # Guardar en CSV
-        filename = output_path / "purchase-orders" / "purchase_orders.csv"
+        filename = output_path / "purchase_orders.csv"
         save_csv_file(orders, filename)
 
         metadata["documents_by_type"]["purchase_orders"] = args.orders
@@ -129,7 +119,7 @@ def generate_all_data(args):
         invoices = generate_invoices(args.invoices)
 
         # Guardar en CSV
-        filename = output_path / "invoices" / "invoices.csv"
+        filename = output_path / "invoices.csv"
         save_csv_file(invoices, filename)
 
         metadata["documents_by_type"]["invoices"] = args.invoices
@@ -142,7 +132,7 @@ def generate_all_data(args):
         sales = generate_sales(args.sales)
 
         # Guardar en CSV
-        filename = output_path / "sales-history" / "sales_data.csv"
+        filename = output_path / "sales_data.csv"
         save_csv_file(sales, filename)
 
         metadata["documents_by_type"]["sales_history"] = args.sales

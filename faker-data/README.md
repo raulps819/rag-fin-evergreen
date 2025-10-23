@@ -71,26 +71,22 @@ python generate.py --clean
 
 ## 📁 Estructura de Salida
 
-Los datos generados se guardan en `./generated-data/` en **formato CSV**:
+Los datos generados se guardan en `./generated-data/` en **formato CSV** (todos en la misma carpeta):
 
 ```
 generated-data/
-├── contracts/
-│   └── contracts.csv
-├── purchase-orders/
-│   └── purchase_orders.csv
-├── invoices/
-│   └── invoices.csv
-├── sales-history/
-│   └── sales_data.csv
-└── metadata.json
+├── contracts.csv         # Contratos agrícolas
+├── purchase_orders.csv   # Órdenes de compra
+├── invoices.csv          # Facturas
+├── sales_data.csv        # Ventas históricas
+└── metadata.json         # Metadata de la generación
 ```
 
 ## 📄 Formato de Datos (CSV)
 
 Los datos se generan en formato CSV con columnas aplanadas. Los campos anidados se separan con guión bajo (_).
 
-### Contratos (`contracts/contracts.csv`)
+### Contratos (`contracts.csv`)
 
 **Columnas principales:**
 - `id`: Identificador único (CONT-YYYY-NNN)
@@ -101,7 +97,7 @@ Los datos se generan en formato CSV con columnas aplanadas. Los campos anidados 
 - `product_name`, `product_quantity`, `product_unit`, `product_pricePerUnit`, `product_totalAmount`: Producto vendido
 - `terms_deliveryDate`, `terms_paymentTerms`, `terms_qualitySpecs`: Términos del contrato
 
-### Órdenes de Compra (`purchase-orders/purchase_orders.csv`)
+### Órdenes de Compra (`purchase_orders.csv`)
 
 **Columnas principales:**
 - `id`: Identificador único (OC-YYYY-NNNN)
@@ -113,7 +109,7 @@ Los datos se generan en formato CSV con columnas aplanadas. Los campos anidados 
 - `deliveryDate`: Fecha de entrega
 - `status`: Estado (confirmada, pendiente, en_transito, entregada, cancelada)
 
-### Facturas (`invoices/invoices.csv`)
+### Facturas (`invoices.csv`)
 
 **Columnas principales:**
 - `id`: Número de factura (FACT-X-PPPP-NNNNNNNN)
@@ -127,7 +123,7 @@ Los datos se generan en formato CSV con columnas aplanadas. Los campos anidados 
 - `paymentMethod`: Método de pago
 - `status`: Estado (pagada, pendiente, vencida)
 
-### Ventas Históricas (`sales-history/sales_data.csv`)
+### Ventas Históricas (`sales_data.csv`)
 
 **Columnas principales:**
 - `id`: Identificador único (SALE-YYYY-NNNN)
