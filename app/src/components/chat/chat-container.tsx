@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Message as MessageType, SuggestedQuestion } from '@/types';
+import { Message as MessageType, SuggestedQuestion, toMessage } from '@/types';
 import { MessageList } from './message-list';
 import { ChatInput } from './chat-input';
 import { SuggestedQuestions, defaultSuggestedQuestions } from './suggested-questions';
 import { toast } from 'sonner';
 import { sendMessage } from '@/services/chat';
+import { getConversation } from '@/services/conversations';
 import { getErrorMessage } from '@/lib/api-client';
 
 interface ChatContainerProps {
@@ -24,21 +25,56 @@ export function ChatContainer({
 }: ChatContainerProps) {
   const [messages, setMessages] = useState<MessageType[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     initialConversationId
   );
 
-  // Update messages when initialMessages change (e.g., when loading a conversation)
+  // Load conversation when conversationId changes
   useEffect(() => {
-    if (initialMessages.length > 0) {
-      setMessages(initialMessages);
-    }
-  }, [initialMessages]);
+    const loadConversation = async () => {
+      // If conversationId changed to a new value, load it
+      if (initialConversationId && initialConversationId !== conversationId) {
+        console.log('[ChatContainer] Loading conversation:', initialConversationId);
+        setIsLoadingConversation(true);
+        setConversationId(initialConversationId);
 
-  // Update conversationId when prop changes
-  useEffect(() => {
-    setConversationId(initialConversationId);
-  }, [initialConversationId]);
+        try {
+          const conversation = await getConversation(initialConversationId);
+
+          // Transform backend messages to frontend format
+          const transformedMessages = conversation.messages.map(toMessage);
+          setMessages(transformedMessages);
+
+          console.log('[ChatContainer] Loaded', transformedMessages.length, 'messages');
+        } catch (error) {
+          console.error('Error loading conversation:', error);
+
+          // If conversation doesn't exist or has no messages (new conversation), just reset
+          if (error instanceof Error && error.message.includes('not found')) {
+            console.log('[ChatContainer] New conversation, starting fresh');
+            setMessages([]);
+          } else {
+            toast.error('Error al cargar la conversación: ' + getErrorMessage(error));
+            setMessages([]);
+          }
+        } finally {
+          setIsLoadingConversation(false);
+        }
+      } else if (!initialConversationId && conversationId) {
+        // If conversationId was cleared (new chat), reset
+        console.log('[ChatContainer] Starting new conversation');
+        setConversationId(undefined);
+        setMessages([]);
+      } else if (initialConversationId === conversationId && initialConversationId) {
+        // Same conversation, but might be newly created (empty)
+        // Don't load if we already have messages or if it's brand new
+        console.log('[ChatContainer] Conversation already loaded or is new');
+      }
+    };
+
+    loadConversation();
+  }, [initialConversationId]); // Only depend on initialConversationId
 
   const handleSendMessage = async (content: string) => {
     console.log('[ChatContainer] Sending message:', {
@@ -109,7 +145,7 @@ export function ChatContainer({
   return (
     <div className="flex flex-col h-full">
       {/* Messages area */}
-      <MessageList messages={messages} isLoading={isLoading} />
+      <MessageList messages={messages} isLoading={isLoading || isLoadingConversation} />
 
       {/* Suggested questions (only shown when no messages) */}
       {showSuggestedQuestions && (

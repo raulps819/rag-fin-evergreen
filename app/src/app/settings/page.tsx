@@ -5,26 +5,69 @@ import { useRouter } from 'next/navigation';
 import { MainLayout } from '@/components/layout';
 import { DocumentUpload } from '@/components/settings/document-upload';
 import { DocumentList } from '@/components/settings/document-list';
+import { useConversations } from '@/hooks/use-conversations';
+import { generateConversationTitle } from '@/types';
 
 export default function SettingsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
+
+  const {
+    conversations,
+    currentConversationId,
+    isLoading,
+    createNew,
+    selectConversation,
+    deleteConversation,
+  } = useConversations();
 
   const handleUploadComplete = () => {
     // Trigger refresh of document list
     setRefreshTrigger((prev) => prev + 1);
   };
 
-  const handleNewChat = () => {
-    // Navigate to home page (chat interface)
+  const handleNewChat = async () => {
+    // Create new conversation
+    const newId = await createNew();
+    if (newId) {
+      // Navigate to home page (chat interface)
+      router.push('/');
+    }
+  };
+
+  const handleSelectConversation = (id: string) => {
+    selectConversation(id);
+    // Navigate to home page to view the conversation
     router.push('/');
   };
+
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await deleteConversation(id);
+    } catch (error) {
+      console.error('Delete failed:', error);
+    }
+  };
+
+  // Convert ConversationMetadata to Conversation format for sidebar
+  const conversationsForSidebar = conversations.map((conv) => ({
+    id: conv.id,
+    title: conv.title || generateConversationTitle([]),
+    messages: [],
+    createdAt: conv.createdAt,
+    updatedAt: conv.updatedAt,
+  }));
 
   return (
     <MainLayout
       title="Configuración"
       subtitle="Gestiona los documentos de la base de conocimiento y preferencias"
+      conversations={conversationsForSidebar}
+      currentConversationId={currentConversationId}
+      isLoadingConversations={isLoading}
       onNewChat={handleNewChat}
+      onSelectConversation={handleSelectConversation}
+      onDeleteConversation={handleDeleteConversation}
     >
       <div className="container max-w-6xl px-4 py-6 md:px-6 md:py-8 space-y-8">
         {/* Page Header */}

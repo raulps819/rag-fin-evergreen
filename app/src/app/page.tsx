@@ -1,75 +1,64 @@
 'use client';
 
-import { useState } from 'react';
 import { ChatContainer } from '@/components/chat';
 import { MainLayout } from '@/components/layout';
-import { Conversation } from '@/types';
-
-// Mock conversations for demonstration
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    title: '¿Cuánto gasté en fertilizantes?',
-    messages: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: '2',
-    title: 'Mejores proveedores de semillas',
-    messages: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24), // Yesterday
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: '3',
-    title: 'Resumen de ventas del trimestre',
-    messages: [],
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5),
-  },
-];
+import { useConversations } from '@/hooks/use-conversations';
+import { generateConversationTitle } from '@/types';
 
 export default function Home() {
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
+  const {
+    conversations,
+    currentConversationId,
+    isLoading,
+    createNew,
+    selectConversation,
+    deleteConversation,
+  } = useConversations();
 
-  const handleNewChat = () => {
-    // Create a new conversation
-    const newConversation: Conversation = {
-      id: `conv-${Date.now()}`,
-      title: 'Nueva conversación',
-      messages: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    setConversations((prev) => [newConversation, ...prev]);
-    setCurrentConversationId(newConversation.id);
-  };
-
-  const handleSelectConversation = (id: string) => {
-    setCurrentConversationId(id);
-    // TODO: Load conversation messages
-  };
-
-  const handleDeleteConversation = (id: string) => {
-    setConversations((prev) => prev.filter((conv) => conv.id !== id));
-    if (currentConversationId === id) {
-      setCurrentConversationId(undefined);
+  const handleNewChat = async () => {
+    const newId = await createNew();
+    if (newId) {
+      console.log('[Home] New conversation created:', newId);
     }
   };
 
+  const handleSelectConversation = (id: string) => {
+    selectConversation(id);
+  };
+
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await deleteConversation(id);
+    } catch (error) {
+      // Error is already handled in the hook with toast
+      console.error('Delete failed:', error);
+    }
+  };
+
+  // Convert ConversationMetadata to Conversation format for sidebar
+  const conversationsForSidebar = conversations.map((conv) => ({
+    id: conv.id,
+    title: conv.title || generateConversationTitle([]),
+    messages: [],
+    createdAt: conv.createdAt,
+    updatedAt: conv.updatedAt,
+  }));
+
   return (
     <MainLayout
-      conversations={conversations}
+      conversations={conversationsForSidebar}
       currentConversationId={currentConversationId}
+      isLoadingConversations={isLoading}
       onNewChat={handleNewChat}
       onSelectConversation={handleSelectConversation}
       onDeleteConversation={handleDeleteConversation}
     >
       {/* Chat takes full height */}
       <div className="h-full">
-        <ChatContainer />
+        <ChatContainer
+          conversationId={currentConversationId || undefined}
+          onConversationChange={(id) => selectConversation(id)}
+        />
       </div>
     </MainLayout>
   );
