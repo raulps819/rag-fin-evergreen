@@ -93,7 +93,7 @@ Por favor, responde de manera útil basándote en el contexto si está disponibl
             response = await client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                max_completion_tokens=1000
+                max_completion_tokens=10000
             )
 
             content = response.choices[0].message.content
