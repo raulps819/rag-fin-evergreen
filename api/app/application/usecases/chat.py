@@ -12,6 +12,7 @@ from app.domain.ports.vector_store import VectorStorePort
 from app.domain.ports.llm_service import LLMServicePort
 from app.domain.ports.conversation_repository import ConversationRepositoryPort
 from app.domain.ports.message_repository import MessageRepositoryPort
+from app.domain.ports.query_expansion_service import QueryExpansionServicePort
 from app.infrastructure.llm.openai_embedding import OpenAIEmbeddingService
 from app.core.config import settings
 
@@ -29,13 +30,15 @@ class ChatUseCase:
         llm_service: LLMServicePort,
         embedding_service: OpenAIEmbeddingService,
         conversation_repository: ConversationRepositoryPort,
-        message_repository: MessageRepositoryPort
+        message_repository: MessageRepositoryPort,
+        query_expansion_service: QueryExpansionServicePort
     ):
         self.vector_store = vector_store
         self.llm_service = llm_service
         self.embedding_service = embedding_service
         self.conversation_repository = conversation_repository
         self.message_repository = message_repository
+        self.query_expansion_service = query_expansion_service
 
     async def execute(self, query: str, conversation_id: Optional[str] = None) -> tuple[Message, str]:
         """
@@ -86,8 +89,15 @@ class ChatUseCase:
         # Limit history to recent messages
         conversation_history = conversation_history[-settings.CONVERSATION_HISTORY_LIMIT:]
 
-        # Step 3: Generate embedding and search for relevant chunks
-        query_embedding = await self.embedding_service.generate_embedding(query)
+        # Step 3: Expand query if enabled (improves semantic search)
+        query_for_embedding = query
+        if settings.ENABLE_QUERY_EXPANSION:
+            logger.info(f"🔍 Expanding query: '{query}'")
+            query_for_embedding = await self.query_expansion_service.expand_query(query)
+            logger.debug(f"Expanded query: '{query_for_embedding}'")
+
+        # Step 4: Generate embedding and search for relevant chunks
+        query_embedding = await self.embedding_service.generate_embedding(query_for_embedding)
 
         # Search for relevant chunks in vector store
         search_results = await self.vector_store.search(

@@ -10,6 +10,7 @@ from app.infrastructure.repositories.message_repository import MessageRepository
 from app.infrastructure.vector.chroma_store import ChromaVectorStore
 from app.infrastructure.llm.openai_embedding import OpenAIEmbeddingService
 from app.infrastructure.llm.openai_chat import OpenAIChatService
+from app.infrastructure.llm.openai_query_expansion import OpenAIQueryExpansionService
 from app.infrastructure.document_processor import DocumentProcessor
 from app.application.usecases.upload_document import UploadDocumentUseCase
 from app.application.usecases.chat import ChatUseCase
@@ -48,6 +49,7 @@ class Container:
         self.vector_store = ChromaVectorStore()
         self.embedding_service = OpenAIEmbeddingService()
         self.chat_service = OpenAIChatService()
+        self.query_expansion_service = OpenAIQueryExpansionService()
         self.document_processor = DocumentProcessor()
 
         # Application layer - Use cases
@@ -86,7 +88,8 @@ class Container:
             llm_service=self.chat_service,
             embedding_service=self.embedding_service,
             conversation_repository=self.conversation_repository,
-            message_repository=self.message_repository
+            message_repository=self.message_repository,
+            query_expansion_service=self.query_expansion_service
         )
 
 
