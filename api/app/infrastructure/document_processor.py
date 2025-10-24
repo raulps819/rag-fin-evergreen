@@ -126,3 +126,80 @@ class DocumentProcessor:
             start = end - overlap if end < len(text) else end
 
         return [c for c in chunks if c]  # Filter empty chunks
+
+    @staticmethod
+    async def extract_tabular_chunks_from_csv(file_content: bytes) -> List[str]:
+        """
+        Extract chunks from CSV file, one chunk per row.
+        Supports multiple encodings including UTF-8, UTF-16, Latin-1, etc.
+
+        Args:
+            file_content: CSV file content as bytes
+
+        Returns:
+            List of text chunks (one per row)
+        """
+        # Try multiple encodings in order of likelihood
+        encodings = ['utf-8', 'utf-16', 'utf-16-le', 'utf-16-be', 'latin-1', 'iso-8859-1', 'cp1252']
+
+        last_error = None
+        for encoding in encodings:
+            try:
+                df = pd.read_csv(BytesIO(file_content), encoding=encoding)
+                return DocumentProcessor._rows_to_text_chunks(df)
+            except (UnicodeDecodeError, UnicodeError):
+                last_error = f"Failed with encoding {encoding}"
+                continue
+            except Exception as e:
+                # If it's not an encoding error, raise immediately
+                raise ValueError(f"Error extracting tabular chunks from CSV: {str(e)}")
+
+        # If all encodings failed
+        raise ValueError(f"Error extracting tabular chunks from CSV: Could not decode file with any supported encoding. Last error: {last_error}")
+
+    @staticmethod
+    async def extract_tabular_chunks_from_excel(file_content: bytes) -> List[str]:
+        """
+        Extract chunks from Excel file, one chunk per row.
+
+        Args:
+            file_content: Excel file content as bytes
+
+        Returns:
+            List of text chunks (one per row)
+        """
+        try:
+            df = pd.read_excel(BytesIO(file_content))
+            return DocumentProcessor._rows_to_text_chunks(df)
+        except Exception as e:
+            raise ValueError(f"Error extracting tabular chunks from Excel: {str(e)}")
+
+    @staticmethod
+    def _rows_to_text_chunks(df: pd.DataFrame) -> List[str]:
+        """
+        Convert DataFrame rows to text chunks.
+
+        Each row becomes a structured text chunk with format:
+        "column1: value1 | column2: value2 | ..."
+
+        Args:
+            df: pandas DataFrame
+
+        Returns:
+            List of text chunks (one per row)
+        """
+        chunks = []
+        for _, row in df.iterrows():
+            parts = []
+            for col in df.columns:
+                val = row[col]
+                # Skip NaN/None values
+                if pd.isna(val):
+                    continue
+                parts.append(f"{col}: {val}")
+
+            # Only add non-empty rows
+            if parts:
+                chunks.append(" | ".join(parts))
+
+        return chunks

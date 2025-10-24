@@ -2,10 +2,13 @@
 Chroma vector store implementation.
 """
 from typing import List, Dict, Any
+import logging
 import chromadb
 from chromadb.config import Settings
 from app.domain.ports.vector_store import VectorStorePort
 from app.core.config import settings as app_settings
+
+logger = logging.getLogger(__name__)
 
 
 class ChromaVectorStore(VectorStorePort):
@@ -25,10 +28,13 @@ class ChromaVectorStore(VectorStorePort):
             )
         )
 
-        # Get or create collection
+        # Get or create collection with cosine metric
         self.collection = self.client.get_or_create_collection(
             name="financial_documents",
-            metadata={"description": "Financial documents embeddings"}
+            metadata={
+                "description": "Financial documents embeddings",
+                "hnsw:space": "cosine"  # Force cosine metric
+            }
         )
 
     def _parse_chroma_host(self) -> str:
@@ -87,8 +93,16 @@ class ChromaVectorStore(VectorStorePort):
         """
         results = self.collection.query(
             query_embeddings=[query_embedding],
-            n_results=top_k
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"]
         )
+
+        # Log distances for inspection
+        try:
+            dists = results.get("distances", [[]])[0]
+            logger.info(f"[Chroma] top_k={top_k} distances={dists}")
+        except Exception as e:
+            logger.warning(f"Could not log distances: {e}")
 
         # Format results
         formatted_results = []

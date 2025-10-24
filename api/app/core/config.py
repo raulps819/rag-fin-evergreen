@@ -29,6 +29,8 @@ class Settings:
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
     TOP_K: int = int(os.getenv("TOP_K", "5"))
     CONVERSATION_HISTORY_LIMIT: int = int(os.getenv("CONVERSATION_HISTORY_LIMIT", "10"))
+    MIN_RELEVANCE: float = float(os.getenv("MIN_RELEVANCE", "0.7"))
+    ENABLE_QUERY_EXPANSION: bool = os.getenv("ENABLE_QUERY_EXPANSION", "true").lower() in ("true", "1", "yes")
 
     @property
     def DATABASE_URL(self) -> str:

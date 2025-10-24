@@ -48,18 +48,25 @@ class UploadDocumentUseCase:
         Returns:
             Created document entity
         """
-        # Step 1: Extract text from document
-        text = await self.document_processor.extract_text(file_content, file_type)
+        # Step 1-2: Extract chunks according to file type
+        file_type_normalized = file_type.lower().replace(".", "")
 
-        if not text:
-            raise ValueError("No text could be extracted from the document")
+        # For tabular data (CSV/Excel), extract chunks row by row
+        if file_type_normalized == "csv":
+            chunks = await self.document_processor.extract_tabular_chunks_from_csv(file_content)
+        elif file_type_normalized in ["xlsx", "xls"]:
+            chunks = await self.document_processor.extract_tabular_chunks_from_excel(file_content)
+        else:
+            # For other formats (PDF, etc.), use traditional text extraction and chunking
+            text = await self.document_processor.extract_text(file_content, file_type)
+            if not text:
+                raise ValueError("No text could be extracted from the document")
 
-        # Step 2: Split text into chunks
-        chunks = await self.document_processor.chunk_text(
-            text,
-            chunk_size=settings.CHUNK_SIZE,
-            overlap=settings.CHUNK_OVERLAP
-        )
+            chunks = await self.document_processor.chunk_text(
+                text,
+                chunk_size=settings.CHUNK_SIZE,
+                overlap=settings.CHUNK_OVERLAP
+            )
 
         if not chunks:
             raise ValueError("No chunks could be created from the document")

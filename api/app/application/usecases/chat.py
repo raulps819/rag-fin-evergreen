@@ -100,18 +100,28 @@ class ChatUseCase:
         sources = []
 
         for result in search_results:
-            if 1-result.get("distance",0) > 0:
+            distance = result.get("distance")
+
+            # Cosine similarity (1 - distance). Si no hay distancia, no filtrar.
+            if distance is None:
+                context_chunks.append(result["document"])
+                similarity = None
+            else:
+                similarity = 1 - distance
+                if similarity < settings.MIN_RELEVANCE:
+                    logger.debug(f"Skipping chunk with similarity {similarity:.3f} below threshold {settings.MIN_RELEVANCE}")
+                    continue
                 context_chunks.append(result["document"])
 
-                metadata = result.get("metadata", {})
-                source = Source(
-                    document_id=metadata.get("document_id", "unknown"),
-                    filename=metadata.get("filename", "unknown"),
-                    chunk_index=metadata.get("chunk_index", 0),
-                    content=result["document"][:200] + "...",  # Preview
-                    relevance_score=1 - result.get("distance", 0) if result.get("distance") is not None else None
-                )
-                sources.append(source)
+            metadata = result.get("metadata", {})
+            source = Source(
+                document_id=metadata.get("document_id", "unknown"),
+                filename=metadata.get("filename", "unknown"),
+                chunk_index=metadata.get("chunk_index", 0),
+                content=result["document"][:200] + "...",  # Preview
+                relevance_score=similarity
+            )
+            sources.append(source)
 
         # Step 5: Prepare context for LLM
         # If no document chunks found, use conversation history as context
