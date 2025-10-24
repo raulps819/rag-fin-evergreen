@@ -136,7 +136,9 @@ export function AppSidebar({
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            handleDeleteClick(e, conversation.id);
+                            e.stopPropagation();
+                            setConversationToDelete(conversation.id);
+                            setDeleteDialogOpen(true);
                           }
                         }}
                       >

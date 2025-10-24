@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Message as MessageType, SuggestedQuestion, toMessage } from '@/types';
+import { Message as MessageType, SuggestedQuestion } from '@/types';
 import { MessageList } from './message-list';
 import { ChatInput } from './chat-input';
 import { SuggestedQuestions, defaultSuggestedQuestions } from './suggested-questions';
@@ -42,11 +42,10 @@ export function ChatContainer({
         try {
           const conversation = await getConversation(initialConversationId);
 
-          // Transform backend messages to frontend format
-          const transformedMessages = conversation.messages.map(toMessage);
-          setMessages(transformedMessages);
+          // Messages are already transformed by toConversationDetail
+          setMessages(conversation.messages);
 
-          console.log('[ChatContainer] Loaded', transformedMessages.length, 'messages');
+          console.log('[ChatContainer] Loaded', conversation.messages.length, 'messages');
         } catch (error) {
           console.error('Error loading conversation:', error);
 

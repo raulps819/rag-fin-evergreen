@@ -15,7 +15,6 @@ export default function SettingsPage() {
   const {
     conversations,
     currentConversationId,
-    isLoading,
     createNew,
     selectConversation,
     deleteConversation,
@@ -63,8 +62,7 @@ export default function SettingsPage() {
       title="Configuración"
       subtitle="Gestiona los documentos de la base de conocimiento y preferencias"
       conversations={conversationsForSidebar}
-      currentConversationId={currentConversationId}
-      isLoadingConversations={isLoading}
+      currentConversationId={currentConversationId || undefined}
       onNewChat={handleNewChat}
       onSelectConversation={handleSelectConversation}
       onDeleteConversation={handleDeleteConversation}

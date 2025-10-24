@@ -9,7 +9,6 @@ export default function Home() {
   const {
     conversations,
     currentConversationId,
-    isLoading,
     createNew,
     selectConversation,
     deleteConversation,
@@ -47,8 +46,7 @@ export default function Home() {
   return (
     <MainLayout
       conversations={conversationsForSidebar}
-      currentConversationId={currentConversationId}
-      isLoadingConversations={isLoading}
+      currentConversationId={currentConversationId || undefined}
       onNewChat={handleNewChat}
       onSelectConversation={handleSelectConversation}
       onDeleteConversation={handleDeleteConversation}
