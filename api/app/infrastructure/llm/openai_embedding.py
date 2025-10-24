@@ -13,7 +13,7 @@ class OpenAIEmbeddingService:
 
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
-        self.model = "text-embedding-3-small"
+        self.model = "text-embedding-3-large"
         # Create client once at initialization to avoid httpx wrapper issues
         self._client = AsyncOpenAI(api_key=self.api_key) if self.api_key else None
 
