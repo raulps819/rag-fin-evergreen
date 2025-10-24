@@ -73,33 +73,33 @@ export function SuggestedQuestions({
 // Default questions for initial state
 export const defaultSuggestedQuestions: SuggestedQuestion[] = [
   {
-    id: '1',
-    text: '¿Cuánto gasté en fertilizantes este mes?',
+    id: 'sales-seasonality',
+    text: '¿Cómo se distribuyeron las ventas de cereales por temporada en 2024?',
+    category: 'sales',
+  },
+  {
+    id: 'general-quarterly-payments',
+    text: 'Dame un resumen trimestral de las ventas y del uso de métodos de pago (cheque, transferencia, etc.).',
+    category: 'general',
+  },
+  {
+    id: 'expenses-seed-supplier',
+    text: 'Calcula cuánto gastamos en semillas con Semillería Argentina durante 2024.',
     category: 'expenses',
   },
   {
-    id: '2',
-    text: '¿Cuáles son mis mejores proveedores?',
+    id: 'providers-top-confirmed',
+    text: '¿Qué proveedores tienen más órdenes de compra confirmadas y cuánto representan en total?',
     category: 'providers',
   },
   {
-    id: '3',
-    text: 'Muestra el resumen de ventas del trimestre',
-    category: 'sales',
-  },
-  {
-    id: '4',
-    text: '¿Qué contratos vencen próximamente?',
+    id: 'documents-due-invoices',
+    text: 'Lista las facturas pendientes y vencidas con sus importes y fechas de emisión.',
     category: 'documents',
   },
   {
-    id: '5',
-    text: 'Compara los precios de semillas de maíz',
-    category: 'providers',
-  },
-  {
-    id: '6',
-    text: '¿Cuál fue mi producto más vendido?',
-    category: 'sales',
+    id: 'documents-lease-renewals',
+    text: '¿Qué contratos de arrendamiento están vigentes y cuáles vencen en los próximos 12 meses?',
+    category: 'documents',
   },
 ];
