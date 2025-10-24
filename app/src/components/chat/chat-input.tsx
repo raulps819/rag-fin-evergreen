@@ -88,7 +88,7 @@ export function ChatInput({
   const canSend = value.trim().length > 0 && !disabled;
 
   return (
-    <div className={cn('border-t bg-gradient-to-b from-background to-muted/20 p-2 sm:p-2', className)}>
+    <div className={cn('bg-transparent p-2 sm:p-2', className)}>
       <div className="max-w-4xl mx-auto space-y-2">
         {/* Main input card */}
         <Card className="shadow-lg border-muted-foreground/10 transition-shadow hover:shadow-xl p-2">

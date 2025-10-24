@@ -72,7 +72,7 @@ export function MainLayout({
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-hidden">
           {children}
         </main>
       </div>
