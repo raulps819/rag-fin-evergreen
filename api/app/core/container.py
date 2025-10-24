@@ -1,7 +1,9 @@
 """
 Dependency container for manual wiring.
 """
+from app.core.config import settings
 from app.infrastructure.db.sqlite_client import SQLiteClient
+from app.infrastructure.db.postgres_client import PostgresClient
 from app.infrastructure.repositories.document_repository import DocumentRepository
 from app.infrastructure.repositories.conversation_repository import ConversationRepository
 from app.infrastructure.repositories.message_repository import MessageRepository
@@ -35,8 +37,11 @@ class Container:
         if self._initialized:
             return
 
-        # Infrastructure layer
-        self.db_client = SQLiteClient()
+        # Infrastructure layer - Auto-detect database type
+        if settings.DATABASE_URL.startswith("postgresql://"):
+            self.db_client = PostgresClient()
+        else:
+            self.db_client = SQLiteClient()
         self.document_repository = DocumentRepository(self.db_client)
         self.conversation_repository = ConversationRepository(self.db_client)
         self.message_repository = MessageRepository(self.db_client)

@@ -100,17 +100,18 @@ class ChatUseCase:
         sources = []
 
         for result in search_results:
-            context_chunks.append(result["document"])
+            if 1-result.get("distance",0) > 0:
+                context_chunks.append(result["document"])
 
-            metadata = result.get("metadata", {})
-            source = Source(
-                document_id=metadata.get("document_id", "unknown"),
-                filename=metadata.get("filename", "unknown"),
-                chunk_index=metadata.get("chunk_index", 0),
-                content=result["document"][:200] + "...",  # Preview
-                relevance_score=1 - result.get("distance", 0) if result.get("distance") is not None else None
-            )
-            sources.append(source)
+                metadata = result.get("metadata", {})
+                source = Source(
+                    document_id=metadata.get("document_id", "unknown"),
+                    filename=metadata.get("filename", "unknown"),
+                    chunk_index=metadata.get("chunk_index", 0),
+                    content=result["document"][:200] + "...",  # Preview
+                    relevance_score=1 - result.get("distance", 0) if result.get("distance") is not None else None
+                )
+                sources.append(source)
 
         # Step 5: Prepare context for LLM
         # If no document chunks found, use conversation history as context

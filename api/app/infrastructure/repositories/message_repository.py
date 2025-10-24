@@ -8,15 +8,15 @@ import uuid
 
 from app.domain.entities.message import Message, Source
 from app.domain.ports.message_repository import MessageRepositoryPort
-from app.infrastructure.db.sqlite_client import SQLiteClient
+from app.infrastructure.db.postgres_client import PostgresClient
 
 
 class MessageRepository(MessageRepositoryPort):
     """
-    SQLite implementation of message repository.
+    PostgreSQL message repository.
     """
 
-    def __init__(self, db_client: SQLiteClient):
+    def __init__(self, db_client: PostgresClient):
         self.db = db_client
 
     async def save(self, message: Message, conversation_id: str) -> str:
@@ -49,18 +49,18 @@ class MessageRepository(MessageRepositoryPort):
 
         query = """
             INSERT INTO messages (id, conversation_id, role, content, sources, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES ($1, $2, $3, $4, $5, $6)
         """
-        params = (
+
+        await self.db.execute(
+            query,
             message.id,
             conversation_id,
             message.role,
             message.content,
             sources_json,
-            message.created_at.isoformat()
+            message.created_at
         )
-
-        await self.db.execute(query, params)
         return message.id
 
     async def get_by_conversation_id(self, conversation_id: str) -> List[Message]:
@@ -76,11 +76,11 @@ class MessageRepository(MessageRepositoryPort):
         query = """
             SELECT id, role, content, sources, created_at
             FROM messages
-            WHERE conversation_id = ?
+            WHERE conversation_id = $1
             ORDER BY created_at ASC
         """
 
-        rows = await self.db.fetch_all(query, (conversation_id,))
+        rows = await self.db.fetch_all(query, conversation_id)
 
         messages = []
         for row in rows:
@@ -103,7 +103,7 @@ class MessageRepository(MessageRepositoryPort):
                 id=row["id"],
                 role=row["role"],
                 content=row["content"],
-                created_at=datetime.fromisoformat(row["created_at"]),
+                created_at=row["created_at"],
                 sources=sources
             ))
 
@@ -116,5 +116,5 @@ class MessageRepository(MessageRepositoryPort):
         Args:
             conversation_id: Conversation identifier
         """
-        query = "DELETE FROM messages WHERE conversation_id = ?"
-        await self.db.execute(query, (conversation_id,))
+        query = "DELETE FROM messages WHERE conversation_id = $1"
+        await self.db.execute(query, conversation_id)

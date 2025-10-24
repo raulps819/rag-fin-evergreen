@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: rag-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=rag_financial
+      - POSTGRES_USER=rag_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-rag_password_change_me}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --locale=C
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag_user -d rag_financial"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - rag-network
+    restart: unless-stopped
+
+  # ChromaDB Vector Store Service
+  chromadb:
+    build:
+      context: .
+      dockerfile: Dockerfile.chromadb
+    container_name: rag-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v2/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+    restart: unless-stopped
+
+  # FastAPI Backend Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: rag-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/app:/app/app  # For development hot-reload
+    environment:
+      - ENV=development
+      - PORT=8000
+      - DATABASE_URL=postgresql://rag_user:${POSTGRES_PASSWORD:-rag_password_change_me}@postgres:5432/rag_financial
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-your-api-key-here}
+      - CHROMA_URL=http://chromadb:8000
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=200
+      - TOP_K=5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - rag-network
+
+  # Next.js Frontend Service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: rag-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - rag-network
+
+volumes:
+  # Persistent volume for PostgreSQL database
+  postgres-data:
+    driver: local
+
+  # Persistent volume for ChromaDB embeddings
+  chroma-data:
+    driver: local
+
+networks:
+  rag-network:
+    driver: bridge

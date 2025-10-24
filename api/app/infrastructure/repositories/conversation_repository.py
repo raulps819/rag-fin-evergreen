@@ -7,15 +7,15 @@ import uuid
 
 from app.domain.entities.conversation import Conversation
 from app.domain.ports.conversation_repository import ConversationRepositoryPort
-from app.infrastructure.db.sqlite_client import SQLiteClient
+from app.infrastructure.db.postgres_client import PostgresClient
 
 
 class ConversationRepository(ConversationRepositoryPort):
     """
-    SQLite implementation of conversation repository.
+    PostgreSQL conversation repository.
     """
 
-    def __init__(self, db_client: SQLiteClient):
+    def __init__(self, db_client: PostgresClient):
         self.db = db_client
 
     async def save(self, conversation: Conversation) -> str:
@@ -33,15 +33,15 @@ class ConversationRepository(ConversationRepositoryPort):
 
         query = """
             INSERT INTO conversations (id, created_at, updated_at)
-            VALUES (?, ?, ?)
+            VALUES ($1, $2, $3)
         """
-        params = (
-            conversation.id,
-            conversation.created_at.isoformat(),
-            conversation.updated_at.isoformat()
-        )
 
-        await self.db.execute(query, params)
+        await self.db.execute(
+            query,
+            conversation.id,
+            conversation.created_at,
+            conversation.updated_at
+        )
         return conversation.id
 
     async def get_by_id(self, conversation_id: str) -> Optional[Conversation]:
@@ -57,18 +57,18 @@ class ConversationRepository(ConversationRepositoryPort):
         query = """
             SELECT id, created_at, updated_at
             FROM conversations
-            WHERE id = ?
+            WHERE id = $1
         """
 
-        row = await self.db.fetch_one(query, (conversation_id,))
+        row = await self.db.fetch_one(query, conversation_id)
 
         if not row:
             return None
 
         return Conversation(
             id=row["id"],
-            created_at=datetime.fromisoformat(row["created_at"]),
-            updated_at=datetime.fromisoformat(row["updated_at"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
             messages=[]
         )
 
@@ -91,8 +91,8 @@ class ConversationRepository(ConversationRepositoryPort):
         for row in rows:
             conversations.append(Conversation(
                 id=row["id"],
-                created_at=datetime.fromisoformat(row["created_at"]),
-                updated_at=datetime.fromisoformat(row["updated_at"]),
+                created_at=row["created_at"],
+                updated_at=row["updated_at"],
                 messages=[]
             ))
 
@@ -107,15 +107,15 @@ class ConversationRepository(ConversationRepositoryPort):
         """
         query = """
             UPDATE conversations
-            SET updated_at = ?
-            WHERE id = ?
+            SET updated_at = $1
+            WHERE id = $2
         """
-        params = (
-            conversation.updated_at.isoformat(),
+
+        await self.db.execute(
+            query,
+            conversation.updated_at,
             conversation.id
         )
-
-        await self.db.execute(query, params)
 
     async def delete(self, conversation_id: str) -> None:
         """
@@ -124,5 +124,5 @@ class ConversationRepository(ConversationRepositoryPort):
         Args:
             conversation_id: Conversation identifier
         """
-        query = "DELETE FROM conversations WHERE id = ?"
-        await self.db.execute(query, (conversation_id,))
+        query = "DELETE FROM conversations WHERE id = $1"
+        await self.db.execute(query, conversation_id)

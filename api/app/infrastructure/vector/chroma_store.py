@@ -11,13 +11,16 @@ from app.core.config import settings as app_settings
 class ChromaVectorStore(VectorStorePort):
     """
     Chroma vector store implementation.
+    Connects to ChromaDB server via HTTP.
     """
 
     def __init__(self):
-        # Initialize Chroma client with persistent storage
+        # Initialize Chroma REST client (required for server-based deployments)
         self.client = chromadb.Client(
             Settings(
-                persist_directory="./data/chroma",
+                chroma_api_impl="chromadb.api.fastapi.FastAPI",
+                chroma_server_host=self._parse_chroma_host(),
+                chroma_server_http_port=self._parse_chroma_port(),
                 anonymized_telemetry=False
             )
         )
@@ -27,6 +30,28 @@ class ChromaVectorStore(VectorStorePort):
             name="financial_documents",
             metadata={"description": "Financial documents embeddings"}
         )
+
+    def _parse_chroma_host(self) -> str:
+        """Extract host from CHROMA_URL."""
+        url = app_settings.CHROMA_URL
+        # Remove http:// or https://
+        if "://" in url:
+            url = url.split("://")[1]
+        # Remove port if present
+        if ":" in url:
+            url = url.split(":")[0]
+        return url
+
+    def _parse_chroma_port(self) -> int:
+        """Extract port from CHROMA_URL."""
+        url = app_settings.CHROMA_URL
+        # Remove http:// or https://
+        if "://" in url:
+            url = url.split("://")[1]
+        # Extract port if present
+        if ":" in url:
+            return int(url.split(":")[1])
+        return 8000  # Default ChromaDB port
 
     async def add_chunks(
         self,

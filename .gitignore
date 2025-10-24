@@ -164,4 +164,18 @@ docs/_build/
 # ==========================================
 # Uvicorn / FastAPI
 # ==========================================
+
+# ==========================================
+# Docker
+# ==========================================
+# Backup files created by Docker scripts
+backups/
+*.backup
+
+# Don't ignore Dockerfiles
+!Dockerfile
+!Dockerfile.*
+!docker-compose*.yml
+!.dockerignore
+
 CLAUDE.md

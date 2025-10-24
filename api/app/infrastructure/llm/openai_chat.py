@@ -18,7 +18,7 @@ class OpenAIChatService(LLMServicePort):
 
     def __init__(self):
         self.api_key = settings.OPENAI_API_KEY
-        self.model = "gpt-5-nano"  # Fast and cost-effective
+        self.model = "gpt-5"  # Fast and cost-effective
         # Create client once at initialization to avoid httpx wrapper issues
         self._client = AsyncOpenAI(api_key=self.api_key) if self.api_key else None
 
