@@ -73,33 +73,33 @@ export function SuggestedQuestions({
 // Default questions for initial state
 export const defaultSuggestedQuestions: SuggestedQuestion[] = [
   {
-    id: 'sales-seasonality',
-    text: '¿Cómo se distribuyeron las ventas de cereales por temporada en 2024?',
-    category: 'sales',
-  },
-  {
-    id: 'general-quarterly-payments',
-    text: 'Dame un resumen trimestral de las ventas y del uso de métodos de pago (cheque, transferencia, etc.).',
-    category: 'general',
-  },
-  {
-    id: 'expenses-seed-supplier',
-    text: 'Calcula cuánto gastamos en semillas con Semillería Argentina durante 2024.',
+    id: 'expenses-fertilizers',
+    text: '¿Cuánto he gastado en fertilizantes este trimestre?',
     category: 'expenses',
   },
   {
-    id: 'providers-top-confirmed',
-    text: '¿Qué proveedores tienen más órdenes de compra confirmadas y cuánto representan en total?',
+    id: 'providers-seed-prices',
+    text: '¿Qué proveedor me ofrece mejores precios por kilo de semilla?',
     category: 'providers',
   },
   {
-    id: 'documents-due-invoices',
-    text: 'Lista las facturas pendientes y vencidas con sus importes y fechas de emisión.',
-    category: 'documents',
+    id: 'sales-coffee-trends',
+    text: '¿Cómo han variado mis ventas de café en los últimos 3 años?',
+    category: 'sales',
   },
   {
-    id: 'documents-lease-renewals',
-    text: '¿Qué contratos de arrendamiento están vigentes y cuáles vencen en los próximos 12 meses?',
-    category: 'documents',
+    id: 'expenses-pesticides',
+    text: '¿Cuál ha sido mi inversión total en pesticidas durante el último año?',
+    category: 'expenses',
+  },
+  {
+    id: 'providers-equipment-comparison',
+    text: '¿Qué proveedores tienen las mejores condiciones de pago para maquinaria agrícola?',
+    category: 'providers',
+  },
+  {
+    id: 'sales-product-performance',
+    text: '¿Qué cultivo me ha generado mayor rentabilidad en los últimos dos trimestres?',
+    category: 'sales',
   },
 ];
