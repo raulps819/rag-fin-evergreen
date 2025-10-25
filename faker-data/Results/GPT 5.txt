@@ -1,0 +1,338 @@
+GPT 5
+
+{
+  "id": "886abf40-7a70-49bb-95fc-0283fa25ca67",
+  "created_at": "2025-10-25T01:47:55.313818",
+  "updated_at": "2025-10-25T01:50:31.710432",
+  "messages": [
+    {
+      "id": "8c1ed122-66ba-4e32-b0bd-ce3edce8451a",
+      "role": "user",
+      "content": "¿Cuánto he gastado en fertilizantes este trimestre?",
+      "sources": null,
+      "created_at": "2025-10-25T01:47:57.665449"
+    },
+    {
+      "id": "4588a3ff-d6af-470d-babd-cf11e76eb41d",
+      "role": "assistant",
+      "content": "Has gastado COP 6.100.000 en fertilizantes en el trimestre actual (2025 Q4). ¿Quieres que lo compare con trimestres anteriores?",
+      "sources": [
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 3,
+          "content": "Año: 2023 | Trimestre: Q4 | Fertilizantes (COP): 5500000 | Semillas (COP): 3400000 | Herramientas (COP): 1350000 | Transporte (COP): 1100000 | Total (COP): 11350000...",
+          "relevance_score": 0.5690704600000001
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 2,
+          "content": "Año: 2023 | Trimestre: Q3 | Fertilizantes (COP): 4800000 | Semillas (COP): 2500000 | Herramientas (COP): 1100000 | Transporte (COP): 780000 | Total (COP): 9180000...",
+          "relevance_score": 0.56828725
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 0,
+          "content": "Año: 2023 | Trimestre: Q1 | Fertilizantes (COP): 4500000 | Semillas (COP): 2800000 | Herramientas (COP): 1200000 | Transporte (COP): 850000 | Total (COP): 9350000...",
+          "relevance_score": 0.56532228
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 9,
+          "content": "Año: 2025 | Trimestre: Q2 | Fertilizantes (COP): 5700000 | Semillas (COP): 3420000 | Herramientas (COP): 1050000 | Transporte (COP): 1020000 | Total (COP): 11190000...",
+          "relevance_score": 0.5603662
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 1,
+          "content": "Año: 2023 | Trimestre: Q2 | Fertilizantes (COP): 5200000 | Semillas (COP): 3100000 | Herramientas (COP): 950000 | Transporte (COP): 920000 | Total (COP): 10170000...",
+          "relevance_score": 0.56030625
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 6,
+          "content": "Año: 2024 | Trimestre: Q3 | Fertilizantes (COP): 5050000 | Semillas (COP): 2650000 | Herramientas (COP): 1150000 | Transporte (COP): 820000 | Total (COP): 9670000...",
+          "relevance_score": 0.556728
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 7,
+          "content": "Año: 2024 | Trimestre: Q4 | Fertilizantes (COP): 5800000 | Semillas (COP): 3600000 | Herramientas (COP): 1420000 | Transporte (COP): 1150000 | Total (COP): 11970000...",
+          "relevance_score": 0.555547
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 10,
+          "content": "Año: 2025 | Trimestre: Q3 | Fertilizantes (COP): 5300000 | Semillas (COP): 2800000 | Herramientas (COP): 1210000 | Transporte (COP): 865000 | Total (COP): 10175000...",
+          "relevance_score": 0.5544716000000001
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 8,
+          "content": "Año: 2025 | Trimestre: Q1 | Fertilizantes (COP): 4950000 | Semillas (COP): 3100000 | Herramientas (COP): 1320000 | Transporte (COP): 935000 | Total (COP): 10305000...",
+          "relevance_score": 0.5542034499999999
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 5,
+          "content": "Año: 2024 | Trimestre: Q2 | Fertilizantes (COP): 5450000 | Semillas (COP): 3250000 | Herramientas (COP): 1000000 | Transporte (COP): 970000 | Total (COP): 10670000...",
+          "relevance_score": 0.5530156500000001
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 4,
+          "content": "Año: 2024 | Trimestre: Q1 | Fertilizantes (COP): 4700000 | Semillas (COP): 2950000 | Herramientas (COP): 1250000 | Transporte (COP): 890000 | Total (COP): 9790000...",
+          "relevance_score": 0.55125415
+        },
+        {
+          "document_id": "298e16ba-6114-446b-97b2-4eb5b3bdd1b1",
+          "filename": "gastos_trimestrales.csv",
+          "chunk_index": 11,
+          "content": "Año: 2025 | Trimestre: Q4 | Fertilizantes (COP): 6100000 | Semillas (COP): 3800000 | Herramientas (COP): 1500000 | Transporte (COP): 1210000 | Total (COP): 12610000...",
+          "relevance_score": 0.5431642999999999
+        }
+      ],
+      "created_at": "2025-10-25T01:48:06.794837"
+    },
+    {
+      "id": "a58acdef-f0bf-49ea-94e1-fd4d4462b3e1",
+      "role": "user",
+      "content": "¿Qué proveedor me ofrece mejores precios por kilo de semilla?",
+      "sources": null,
+      "created_at": "2025-10-25T01:48:14.153682"
+    },
+    {
+      "id": "7f12f2b4-f00d-498e-bf27-f612afd8819f",
+      "role": "assistant",
+      "content": "El mejor precio por kilo lo ofrece Proveeduría El Campesino: Semilla Caturra a COP 8.000/kg (Málaga, calificación 4.3, Tel. 3145678901).\n\nComo referencias cercanas:\n- AgroAndina S.A.S.: Caturra a COP 8.500/kg\n- Semillas del Oriente: Castillo a COP 9.200/kg\n\n¿Quieres que los ordene por variedad o por calificación además del precio?",
+      "sources": [
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 4,
+          "content": "Proveedor: AgroNorte Ltda. | Producto: Semilla Tabí | Precio por Kg (COP): 11200 | Ubicación: Cúcuta | Teléfono: 3203456789 | Calificación (1-5): 4.8...",
+          "relevance_score": 0.60488462
+        },
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 3,
+          "content": "Proveedor: Distribuidora La Cosecha | Producto: Semilla Bourbon | Precio por Kg (COP): 10500 | Ubicación: Barbosa | Teléfono: 3187654321 | Calificación (1-5): 4.6...",
+          "relevance_score": 0.59622693
+        },
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 1,
+          "content": "Proveedor: Semillas del Oriente | Producto: Semilla Castillo | Precio por Kg (COP): 9200 | Ubicación: Piedecuesta | Teléfono: 3109876543 | Calificación (1-5): 4.5...",
+          "relevance_score": 0.59305608
+        },
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 0,
+          "content": "Proveedor: AgroAndina S.A.S. | Producto: Semilla Caturra | Precio por Kg (COP): 8500 | Ubicación: Bucaramanga | Teléfono: 3201234567 | Calificación (1-5): 4.7...",
+          "relevance_score": 0.5797466
+        },
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 5,
+          "content": "Proveedor: Proveeduría El Campesino | Producto: Semilla Caturra | Precio por Kg (COP): 8000 | Ubicación: Málaga | Teléfono: 3145678901 | Calificación (1-5): 4.3...",
+          "relevance_score": 0.5748198
+        },
+        {
+          "document_id": "a25a6fb6-639d-4143-8442-54118f3c6e6c",
+          "filename": "proveedores.csv",
+          "chunk_index": 2,
+          "content": "Proveedor: Caficultores Unidos | Producto: Semilla Geisha | Precio por Kg (COP): 12000 | Ubicación: San Gil | Teléfono: 3156789012 | Calificación (1-5): 4.9...",
+          "relevance_score": 0.5527057
+        }
+      ],
+      "created_at": "2025-10-25T01:48:25.144054"
+    },
+    {
+      "id": "867aa8e0-e4f5-424f-9dc4-40de70f544d8",
+      "role": "user",
+      "content": "¿Cómo han variado mis ventas de café en los últimos 3 años?",
+      "sources": null,
+      "created_at": "2025-10-25T01:48:29.851491"
+    },
+    {
+      "id": "dc734781-52c9-4027-b9f2-59b16f1aa219",
+      "role": "assistant",
+      "content": "¡Gracias por compartir tus datos! Basándome en tu registro, así han variado tus ventas de café en los últimos 3 años (2023–2025):\n\n- 2023:\n  - Cantidad: 17.650 kg\n  - Ingresos: COP 169.120.000\n  - Precio promedio: COP 9.582/kg\n\n- 2024:\n  - Cantidad: 18.250 kg (+3,4% vs. 2023)\n  - Ingresos: COP 189.450.000 (+12,0%)\n  - Precio promedio: COP 10.381/kg (+8,3%)\n\n- 2025:\n  - Cantidad: 18.850 kg (+3,3% vs. 2024; +6,8% vs. 2023)\n  - Ingresos: COP 203.200.000 (+7,3% vs. 2024; +20,2% vs. 2023)\n  - Precio promedio: COP 10.781/kg (+3,9% vs. 2024; +12,5% vs. 2023)\n\nClaves de la variación:\n- Crecimiento sostenido: suben tanto el volumen (+6,8% en 3 años) como el precio promedio (+COP 1.199/kg), lo que impulsa los ingresos (+20,2%).\n- Estacionalidad marcada: picos en noviembre–diciembre y valles en enero–febrero. En promedio, las ventas de fin de año son ~45% mayores que a inicios de año.\n- Precios al alza de forma consistente año a año, contribuyendo de forma relevante al crecimiento de ingresos.\n\nSi quieres, puedo graficar la tendencia mensual o descomponer el crecimiento de ingresos entre efecto precio y efecto volumen con más detalle.",
+      "sources": [
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 25,
+          "content": "Año: 2025 | Mes: Febrero | Cantidad Vendida (kg): 1250 | Precio Promedio (COP/kg): 10300 | Ingreso Total (COP): 12875000...",
+          "relevance_score": 0.51505405
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 35,
+          "content": "Año: 2025 | Mes: Diciembre | Cantidad Vendida (kg): 1900 | Precio Promedio (COP/kg): 11300 | Ingreso Total (COP): 21470000...",
+          "relevance_score": 0.51073933
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 26,
+          "content": "Año: 2025 | Mes: Marzo | Cantidad Vendida (kg): 1400 | Precio Promedio (COP/kg): 10400 | Ingreso Total (COP): 14560000...",
+          "relevance_score": 0.50987983
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 34,
+          "content": "Año: 2025 | Mes: Noviembre | Cantidad Vendida (kg): 1750 | Precio Promedio (COP/kg): 11200 | Ingreso Total (COP): 19600000...",
+          "relevance_score": 0.50872195
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 24,
+          "content": "Año: 2025 | Mes: Enero | Cantidad Vendida (kg): 1300 | Precio Promedio (COP/kg): 10200 | Ingreso Total (COP): 13260000...",
+          "relevance_score": 0.50863647
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 27,
+          "content": "Año: 2025 | Mes: Abril | Cantidad Vendida (kg): 1550 | Precio Promedio (COP/kg): 10500 | Ingreso Total (COP): 16275000...",
+          "relevance_score": 0.50722432
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 28,
+          "content": "Año: 2025 | Mes: Mayo | Cantidad Vendida (kg): 1700 | Precio Promedio (COP/kg): 10600 | Ingreso Total (COP): 18020000...",
+          "relevance_score": 0.5047018
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 3,
+          "content": "Año: 2023 | Mes: Abril | Cantidad Vendida (kg): 1450 | Precio Promedio (COP/kg): 9300 | Ingreso Total (COP): 13485000...",
+          "relevance_score": 0.50443769
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 29,
+          "content": "Año: 2025 | Mes: Junio | Cantidad Vendida (kg): 1800 | Precio Promedio (COP/kg): 10700 | Ingreso Total (COP): 19260000...",
+          "relevance_score": 0.5043202
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 2,
+          "content": "Año: 2023 | Mes: Marzo | Cantidad Vendida (kg): 1300 | Precio Promedio (COP/kg): 9200 | Ingreso Total (COP): 11960000...",
+          "relevance_score": 0.50428462
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 1,
+          "content": "Año: 2023 | Mes: Febrero | Cantidad Vendida (kg): 1150 | Precio Promedio (COP/kg): 9100 | Ingreso Total (COP): 10465000...",
+          "relevance_score": 0.5034519399999999
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 32,
+          "content": "Año: 2025 | Mes: Septiembre | Cantidad Vendida (kg): 1450 | Precio Promedio (COP/kg): 11000 | Ingreso Total (COP): 15950000...",
+          "relevance_score": 0.50251424
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 31,
+          "content": "Año: 2025 | Mes: Agosto | Cantidad Vendida (kg): 1500 | Precio Promedio (COP/kg): 10900 | Ingreso Total (COP): 16350000...",
+          "relevance_score": 0.5020076
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 14,
+          "content": "Año: 2024 | Mes: Marzo | Cantidad Vendida (kg): 1350 | Precio Promedio (COP/kg): 10000 | Ingreso Total (COP): 13500000...",
+          "relevance_score": 0.50017345
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 10,
+          "content": "Año: 2023 | Mes: Noviembre | Cantidad Vendida (kg): 1650 | Precio Promedio (COP/kg): 10000 | Ingreso Total (COP): 16500000...",
+          "relevance_score": 0.4999321
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 5,
+          "content": "Año: 2023 | Mes: Junio | Cantidad Vendida (kg): 1700 | Precio Promedio (COP/kg): 9500 | Ingreso Total (COP): 16150000...",
+          "relevance_score": 0.49720657
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 11,
+          "content": "Año: 2023 | Mes: Diciembre | Cantidad Vendida (kg): 1800 | Precio Promedio (COP/kg): 10100 | Ingreso Total (COP): 18180000...",
+          "relevance_score": 0.49660059999999995
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 9,
+          "content": "Año: 2023 | Mes: Octubre | Cantidad Vendida (kg): 1500 | Precio Promedio (COP/kg): 9900 | Ingreso Total (COP): 14850000...",
+          "relevance_score": 0.49579530000000005
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 33,
+          "content": "Año: 2025 | Mes: Octubre | Cantidad Vendida (kg): 1600 | Precio Promedio (COP/kg): 11100 | Ingreso Total (COP): 17760000...",
+          "relevance_score": 0.49504899999999996
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 12,
+          "content": "Año: 2024 | Mes: Enero | Cantidad Vendida (kg): 1250 | Precio Promedio (COP/kg): 9800 | Ingreso Total (COP): 12250000...",
+          "relevance_score": 0.49361
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 22,
+          "content": "Año: 2024 | Mes: Noviembre | Cantidad Vendida (kg): 1700 | Precio Promedio (COP/kg): 10800 | Ingreso Total (COP): 18360000...",
+          "relevance_score": 0.49285080000000003
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 7,
+          "content": "Año: 2023 | Mes: Agosto | Cantidad Vendida (kg): 1400 | Precio Promedio (COP/kg): 9700 | Ingreso Total (COP): 13580000...",
+          "relevance_score": 0.49260210000000004
+        },
+        {
+          "document_id": "65f2b31a-4e6b-44d6-b627-7af6fbbe0232",
+          "filename": "ventas_cafe_2023_2025.csv",
+          "chunk_index": 8,
+          "content": "Año: 2023 | Mes: Septiembre | Cantidad Vendida (kg): 1350 | Precio Promedio (COP/kg): 9800 | Ingreso Total (COP): 13230000...",
+          "relevance_score": 0.49194013999999997
+        },
+        {
+          "document_id": "65f2b3

@@ -1,0 +1,36 @@
+{
+  "expenses-fertilizers": {
+    "question": "¿Cuánto he gastado en fertilizantes este trimestre?",
+    "answer": "6,100,000 COP",
+    "source": "2025 Q4"
+  },
+  "providers-seed-prices": {
+    "question": "¿Qué proveedor me ofrece mejores precios por kilo de semilla?",
+    "answer": "Proveeduría El Campesino con Semilla Caturra a 8,000 COP/kg",
+    "source": "proveedores.csv"
+  },
+  "sales-coffee-trends": {
+    "question": "¿Cómo han variado mis ventas de café en los últimos 3 años?",
+    "answer": [
+      { "Año": 2023, "Ingreso Total (COP)": 169120000 },
+      { "Año": 2024, "Ingreso Total (COP)": 189450000 },
+      { "Año": 2025, "Ingreso Total (COP)": 203200000 }
+    ],
+    "source": "ventas_cafe_2023_2025.csv"
+  },
+  "expenses-pesticides": {
+    "question": "¿Cuál ha sido mi inversión total en pesticidas durante el último año?",
+    "answer": "No registrado",
+    "source": "gastos_trimestrales.csv"
+  },
+  "providers-equipment-comparison": {
+    "question": "¿Qué proveedores tienen las mejores condiciones de pago para maquinaria agrícola?",
+    "answer": "No registrado",
+    "source": "proveedores.csv"
+  },
+  "sales-product-performance": {
+    "question": "¿Qué cultivo me ha generado mayor rentabilidad en los últimos dos trimestres?",
+    "answer": "Café",
+    "source": "ventas_cafe_2023_2025.csv"
+  }
+}
