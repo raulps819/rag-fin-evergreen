@@ -44,11 +44,6 @@ Este proyecto demuestra la implementación de arquitectura full-stack moderna co
 > - Document reference display
 > - <img width="1896" height="878" alt="image" src="https://github.com/user-attachments/assets/d22ed4d1-2ce0-4a84-b5a6-1a860b73e4cb" />
 
-```
-![Chat Interface](./docs/images/chat-interface.png)
-![Data Visualization](./docs/images/visualization.png)
-![Document References](./docs/images/document-refs.png)
-```
 
 ---
 
