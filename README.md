@@ -39,11 +39,10 @@ Este proyecto demuestra la implementación de arquitectura full-stack moderna co
 
 ## 📸 Screenshots
 
-> **Note:** Add your screenshots here to showcase the interface. Suggested screenshots:
 > - Main chat interface with a sample query
-> - Data visualization examples (charts/tables)
+> - <img width="1913" height="879" alt="image" src="https://github.com/user-attachments/assets/e0a364ce-1e38-447d-bf45-2086563ff164" />
 > - Document reference display
-> - Sidebar with conversation history
+> - <img width="1896" height="878" alt="image" src="https://github.com/user-attachments/assets/d22ed4d1-2ce0-4a84-b5a6-1a860b73e4cb" />
 
 ```
 ![Chat Interface](./docs/images/chat-interface.png)
